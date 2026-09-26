@@ -9,17 +9,17 @@ from astropy.coordinates import SkyCoord
 import numpy as np
 import pandas as pd
 
-telescope           = "JWST"
-instrument_name     = "NIRCAM*"
-program_id          = "1227"
+telescope = "JWST"
+instrument_name = "NIRCAM*"
+program_id = "1227"
 
 folder = "../../../../../../net/vdesk/data2/slagter/"
 sys.path.append(folder)
-dir_name     = f'{telescope}_NIRCAM_#{program_id}_level_2'
-os.makedirs(folder+dir_name, exist_ok=True) 
+dir_name = f"{telescope}_NIRCAM_#{program_id}_level_2"
+os.makedirs(folder + dir_name, exist_ok=True)
 
 
-#print(f"Looking for program {program_id}...")
+# print(f"Looking for program {program_id}...")
 
 # obs_table = Observations.query_criteria(
 #     obs_collection=telescope,
@@ -55,15 +55,25 @@ os.makedirs(folder+dir_name, exist_ok=True)
 # Observations.download_products(filtered_products, download_dir=folder+dir_name)
 
 
+GAIA_USER = "lslagter"
+GAIA_PASS = "Xr7qVFLZBxPmWy@"  # Or enter your password as a string directly
+
+Gaia.login(user=GAIA_USER, password=GAIA_PASS)
 
 
-
-Gaia.ROW_LIMIT  = -1     # Find all sources --> NO CAP ON DOWNLOADED FILE SIZE
-Gaia.TIMEOUT    = 120      # stop after 120 seconds of search???
+Gaia.ROW_LIMIT = -1  # Find all sources --> NO CAP ON DOWNLOADED FILE SIZE
+Gaia.TIMEOUT = 120  # stop after 120 seconds of search???
 
 # Central coordinates for NGC 346
+
+radius_arcmin = 10 #arcmin
+
 print(f"Targeting ngc 346...")
-ra_deg, dec_deg, radius_deg = 14.770821063331482, -72.17833229841659, 5/60  # 5 arcmin in deg
+ra_deg, dec_deg, radius_deg = (
+    14.770821063331482,
+    -72.17833229841659,
+    radius_arcmin / 60,
+)  
 
 query = f"""
 SELECT source_id, ra, dec, parallax, pmra, pmdec,
@@ -80,19 +90,24 @@ WHERE 1=CONTAINS(
 
 job = Gaia.launch_job_async(query, verbose=True)
 results = job.get_results()
- 
 
-prefac      = 2.5/np.log(10) # 2.5/ln(10)
+
+prefac      = 2.5 / np.log(10)  # 2.5/ln(10)
 sigmaG_0    = 0.0027553202
 sigmaGBP_0  = 0.0027901700
 sigmaGRP_0  = 0.0037793818
-results["phot_g_mean_mag_error"]  = prefac / results["phot_g_mean_flux_over_error"]
-results["phot_bp_mean_mag_error"] = prefac / results["phot_bp_mean_flux_over_error"]
-results["phot_rp_mean_mag_error"] = prefac / results["phot_rp_mean_flux_over_error"]
 
+
+results["phot_g_mean_mag_error"]  = np.sqrt((prefac / results["phot_g_mean_flux_over_error"])**2 + sigmaG_0**2)
+results["phot_bp_mean_mag_error"] = np.sqrt((prefac / results["phot_bp_mean_flux_over_error"])**2+ sigmaGBP_0**2)
+results["phot_rp_mean_mag_error"] = np.sqrt((prefac / results["phot_rp_mean_flux_over_error"])**2 + sigmaGRP_0**2)
 
 # after computing the *_mag_error columns
-df = results.to_pandas()          # masked values -> NaN
-df.to_csv(folder + dir_name + '/ngc346_gaia_dr3_5arcmin_clean.txt',
-          sep=' ', index=False, na_rep='NaN')   # header=True by default
+df = results.to_pandas()  # masked values -> NaN
+df.to_csv(
+    folder + dir_name + "/ngc346_gaia_dr3_10arcmin_clean.txt",
+    sep=" ",
+    index=False,
+    na_rep="NaN",
+)  # header=True by default
 Gaia.remove_jobs([job.jobid])
