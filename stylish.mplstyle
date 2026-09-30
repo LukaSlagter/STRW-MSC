@@ -1,0 +1,47 @@
+# Holy grail: https://matplotlib.org/stable/users/explain/customizing.html
+
+# Set fontsize and options
+font.size: 14
+font.family: STIXGeneral
+mathtext.fontset: stix
+
+
+# All labelsizes etc...
+axes.labelsize  : 20
+xtick.labelsize : 20
+ytick.labelsize : 20
+legend.fontsize : 13         #slightly smaller to not clutter everything!
+
+# Set the figure size (for MNRAS!)
+figure.figsize: 8, 5
+
+# Remove padding
+figure.constrained_layout.use: False
+figure.constrained_layout.h_pad: 0.005
+figure.constrained_layout.w_pad: 0.005
+figure.constrained_layout.hspace: 0.1
+figure.constrained_layout.wspace: 0.1
+
+# Change ticks to face in instead of out and on both sides
+xtick.bottom:        True    # draw ticks on the bottom side
+ytick.left:          True    # draw ticks on the left side
+
+xtick.top:           True    # draw ticks on the top side
+xtick.labeltop:      False   # draw label on the top
+
+ytick.right:         True    # draw ticks on the right side
+ytick.labelright:    False   # draw tick labels on the right side
+
+xtick.direction: in
+ytick.direction: in
+
+
+# Remove Legend box
+legend.frameon: True
+legend.fancybox: True
+legend.framealpha: 1
+legend.facecolor: "white"
+legend.edgecolor: "black"
+
+# Change color cycle
+axes.prop_cycle: cycler('color', ['0077BB','33BBEE', '009988', 'EE7733', 'CC3311', 'EE3377', 'BBBBBB'])
