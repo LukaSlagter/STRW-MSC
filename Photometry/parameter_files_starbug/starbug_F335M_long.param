@@ -11,17 +11,17 @@ FILTER      =            //Set a custom filter for the image
 
 ## DETECTETION 
 FWHM        = -1         //Custom FWHM for image (-1 to use WEBBPSF)
-SIGSKY      = 2.0               //(float>0) 
-SIGSRC      = 5.0               //Source value mininmum N sigma above background
+SIGSKY      = 1.8               //(float>0) 
+SIGSRC      = 4.0              //Source value mininmum N sigma above background
 DOBGD2D     = 1          //Run background2D step (usually finds more sources but takes time)
 DOCONVL     = 1          //Run convolution step (usually finds more sources)
 CLEANSRC    = 1          //Run source cleaning after detection (removes likely contaminants)
-SHARP_LO    = 0.5               //Cutoff in detection
-SHARP_HI    = 1.05              //Cutoff in detection
-ROUND1_HI   = 1.3               //Cutoff in detection
-ROUND2_HI   = 1.3               //Cutoff in detection
-SMOOTH_LO   = 0.0               //Cutoff in detection
-SMOOTH_HI   = 1.6               //Cutoff in detection 
+SHARP_LO    = 0.4               //Cutoff in detection
+SHARP_HI    = 1.2               //Cutoff in detection
+ROUND1_HI   = 1.1               //Cutoff in detection
+ROUND2_HI   = 1.1               //Cutoff in detection
+SMOOTH_LO   = 0               //Cutoff in detection
+SMOOTH_HI   = 1.5               //Cutoff in detection 
 RICKER_R    = 1.0               //Radius (pix) of ricker wavelet 
 
 ## APERTURE PHOTOMOETRY
@@ -45,7 +45,7 @@ PSF_FILE    =            //Non default PSF file
 USE_WCS     = 1          //When loading an AP_FILE, do you want to use WCS or xy values (if available)
 ZP_MAG      = 8.9        //Zero point (mag) to add to the magnitude columns 
 
-CRIT_SEP    =            //minimum distance for grouping (pixels) between two sources
+CRIT_SEP    = 6             //minimum distance for grouping (pixels) between two sources
 FORCE_POS   = 0          //Force centroid position (1) or allow psf fitting to fit position too (0)
 DPOS_THRESH = -1         //If allowed to fit position, max separation (arcsec) from source list centroid
 MAX_XYDEV   = 3p         //Maximum deviation from initial guess centroid position
@@ -56,7 +56,7 @@ GEN_RESIDUAL= 0          //Generate a residual image
 CALC_CROWD  = 1          //Run crowding metric calculation (execution time scales N^2)
 
 ## CATALOGUE MATCHING
-MATCH_THRESH= 0.06                  //matching separation threshold in units arcsec
+MATCH_THRESH= 0.1                 //matching separation threshold in units arcsec
 MATCH_COLS  =            //EXTRA columns to include in output matched table i.e sharpness
 NEXP_THRESH = 3                     //Keep sources that appear in NUM >= NEXP_THRESH (if -1 keep everything)
 SN_THRESH   = -1         //Remove sources with SN ratio < SN_THRESH before matching (default -1 to not apply this cut)

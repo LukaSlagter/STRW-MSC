@@ -4,6 +4,8 @@
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 import os
+
+# os.chdir("/home/slagter/Astronomy_master/STRW-MSC/SF_in_NGC/scripts")
 from scripts.image1overf import sub1fimaging
 
 os.chdir("/home/slagter/Astronomy_master/STRW-MSC/SF_in_NGC")
@@ -18,16 +20,7 @@ import tqdm
 plt.style.use("/home/slagter/Astronomy_master/STRW-MSC/stylish.mplstyle")
 from astropy.table import Table
 from astropy.table import Table
-from matplotlib.lines import Line2D
-from matplotlib.animation import FuncAnimation
-import matplotlib.ticker as ticker
-from matplotlib.ticker import (
-    FixedLocator,
-    AutoMinorLocator,
-    MultipleLocator,
-    LogLocator,
-    NullFormatter,
-)
+
 from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes, mark_inset
 from scipy.spatial import KDTree
 from matplotlib.patches import Circle
@@ -78,16 +71,20 @@ class Read_Catalogue:
         return
 
     def show_headers(self):
+        """
+        show headers of the catalogue
+        """
         with fits.open(self.catalogue_path) as hdulist:
-            # Loop door alle beschikbare HDU-extensies
             for i, hdu in enumerate(hdulist):
                 print(f"--- HEADER EXTENSIE {i} ({hdu.name}) ---")
-                # repr() zorgt ervoor dat de kaarten netjes met regelafbrekingen worden getoond
                 print(repr(hdu.header))
                 print("\n" + "=" * 40 + "\n")
         return
 
     def mask_region(self, RA, DEC):
+        """
+        Zoom in to specified region (cutout in RA and DEC)
+        """
         self.cat_mask = (
             (self.cat_data["RA"] <= RA[1]) & (self.cat_data["RA"] >= RA[0])
         ) & ((self.cat_data["DEC"] <= DEC[1]) & (self.cat_data["DEC"] >= DEC[0]))
@@ -114,22 +111,27 @@ class Pipeline_level_2_data:
 
     def run_pipeline_all(
         self,
-        filt="F115W",
-        overwrite_always_run=False,
+        filt="",
+        overwrite_dic={
+            "1/f": False,
+            "Jhat calibration": False,
+            "Association file": False,
+            "Image3Pipeline": False,
+        },
         output_dir="/net/vdesk/data2/slagter/JWST_NIRCAM_#1227_level_3",
-        Number_of_systems=None,
+        Number_of_dithers=None,
     ):  # standard level 3 output directory for all frames!
 
         print(f"----Initializing Pipeline for {filt}---------")
-        mosaic_title = f"mosaic_{filt}_test"
+        mosaic_title = f"mosaic_{filt}_final"
         association_path = output_dir + "/" + mosaic_title + ".json"
         mosaic_path = output_dir + "/" + mosaic_title + "_i2d.fits"
         print(f"----Results stored in {mosaic_title}-----")
 
         Number_of_frames = (
             len(self.files.file_paths_1overf[filt])
-            if Number_of_systems is None
-            else Number_of_systems
+            if Number_of_dithers is None
+            else Number_of_dithers
         )
         print(f"----We have a total of {Number_of_frames}# to run----------")
 
@@ -137,7 +139,10 @@ class Pipeline_level_2_data:
         for IMAGE_INDEX in tqdm.tqdm(
             range(Number_of_frames), desc="(1) Calibrating 1/f"
         ):  #
-            if Path(self.files.file_paths_1overf[filt][IMAGE_INDEX]).exists() == False:
+            if (
+                Path(self.files.file_paths_1overf[filt][IMAGE_INDEX]).exists() == False
+                or overwrite_dic["1/f"] == True
+            ):
                 self.calibrate_one_over_f(IMAGE_INDEX, filt)
 
         # Running wcs on own gaia dr3!
@@ -147,15 +152,15 @@ class Pipeline_level_2_data:
             if (
                 Path(self.files.file_paths_1overf_jhat[filt][IMAGE_INDEX]).exists()
                 == False
-                or overwrite_always_run == True
+                or overwrite_dic["1/f"] == True
             ):
                 self.assign_WCS_from_gaia_dr3(IMAGE_INDEX=IMAGE_INDEX, filter=filt)
 
         # Now we have filled each folder with its 1/f calibrated fits file with its WCS attached
-
         print("(3) Creating association file")
-        if Path(association_path).exists() == False or overwrite_always_run == True:
-
+        if (Path(association_path).exists() == False) or (
+            overwrite_dic["Association file"] == True
+        ):
             #!!!!!!
             # Remember to dissable mask if runinng all!!!!!
             #!!!!!!
@@ -170,7 +175,11 @@ class Pipeline_level_2_data:
                 f.write(asn.dump()[1])
 
         print(f"(4) Running Image3Pipeline JWST with tweakreg DISABLED")
-        if Path(mosaic_path).exists() == False or overwrite_always_run == True:
+        if (
+            Path(mosaic_path).exists() == False
+            or overwrite_dic["Image3Pipeline file"] == True
+        ):
+
             parameter_dict = {
                 "tweakreg": {
                     "skip": True  # Following Jeroens paper with our own gaia dr3 alignment
@@ -181,13 +190,6 @@ class Pipeline_level_2_data:
                 asn_file, steps=parameter_dict, save_results=True, output_dir=output_dir
             )
 
-        print(f"(5) Plotting resutling mosaic")
-        Image = self._collect_image(mosaic_path)
-        interval = ZScaleInterval()
-        vmin, vmax = interval.get_limits(Image)
-
-        plt.imshow(Image, cmap="gray", vmin=vmin, vmax=vmax, origin="lower")
-        plt.show()
         print("----Completed----")
         return
 
@@ -339,22 +341,24 @@ class Pipeline_level_2_data:
         )  # .lstrip('/')
         prev_cwd = os.getcwd()
         os.chdir(out_put_dir)
-        config = load_starbug_params(self._determine_filename_sb2_param(filter=filter))
+        config = load_starbug_params(
+            self._determine_filename_sb2_param(filter=filter, mode="short")
+        )
 
         gaia_cat_path = (
-            str(Path(self.wdir).parent.parent) + "/ngc346_gaia_dr3_15arcmin_clean.txt"
+            str(Path(self.wdir).parent.parent) + "/ngc346_gaia_dr3_10arcmin_clean.txt"
         )
 
         try:
             wcs_align.run_all(
                 self.files.file_paths_1overf[filter][IMAGE_INDEX],
                 telescope="jwst",
-                # outsubdir= out_put_dir ,
-                imagetype="cal",  # Need to specify as the filename is ext3
-                overwrite=True,  # Ensure that if function is called we actually compute new stuff
+                # outsubdir= out_put_dir ,  # Leave out as we manually switch to it with OS (see above code)
+                imagetype="cal",            # Need to specify as the filename is ext3
+                overwrite=True,             # Ensure that if function is called we actually compute new stuff
                 d2d_max=0.5,
                 showplots=0,
-                refcatname=gaia_cat_path,  # Downloaded gaia catalog, 5 armin around coordiantes of NGC346
+                refcatname=gaia_cat_path,   # Downloaded gaia catalog, 5 armin around coordiantes of NGC346
                 refcat_racol="ra",
                 refcat_deccol="dec",
                 refcat_magcol="phot_g_mean_mag",
@@ -366,9 +370,10 @@ class Pipeline_level_2_data:
                 SNR_min=config.get("SIGSRC"),
                 dmag_max=1.0,
                 objmag_lim=(14, 24),
+                verbose=0,  # stop the annoying prints?
             )
 
-        # #regardless of the try above go back to previous cwd
+        # #regardless of the try above : go back to previous cwd
         finally:
             os.chdir(prev_cwd)
 
@@ -502,12 +507,21 @@ class Pipeline_level_2_data:
             print()
         return
 
-    def _determine_filename_sb2_param(self, filter):
-        return str(
-            "/home/slagter/Astronomy_master/STRW-MSC/SF_in_NGC/Photometry/parameter_files_starbug/starbug_"
-            + filter
-            + ".param"
-        )
+    def _determine_filename_sb2_param(self, filter, mode="short"):
+        """
+        Ease of use function to find SB2 param file based on filter
+        """
+        if mode is not None:
+            return str(
+                "/home/slagter/Astronomy_master/STRW-MSC/SF_in_NGC/Photometry/parameter_files_starbug/starbug_"
+                + filter
+                + "_"
+                + mode
+                + ".param"
+            )
+
+        else:
+            return
 
     def starbug2_aperture_photometry(
         self,
@@ -559,6 +573,9 @@ class Pipeline_level_2_data:
         return fits.open(filename)[1].data
 
     def plot_cal_steps_per_filter(self, IMAGE_INDEX, filter, save=False):
+
+        os.chdir("/home/slagter/Astronomy_master/STRW-MSC/SF_in_NGC")
+
         print("Plotting Level 2 downloaded data...")
 
         fig = plt.figure(figsize=(30, 7))
@@ -597,6 +614,8 @@ class Pipeline_level_2_data:
             ax.set_xticklabels([])
         fig.suptitle(filter, fontsize=fontsize + 10)
 
+        pwd = os.getcwd()
+        print(pwd)
         if save == True:
             plt.savefig(
                 f"Plots/bgd_cal_steps/I_{IMAGE_INDEX}_{filter}.pdf", bbox_inches="tight"
@@ -751,7 +770,7 @@ class Pipeline_level_2_data:
 class File_Finder:
     """
     Finds calibrated (_cal.fits) files under a working directory and
-    splits them by filter, read from the FITS header FILTER keyword.
+    splits them by each unique filter, read from the FITS header FILTER keyword.
     """
 
     def __init__(self, wdir, filter_patterns=None):
@@ -815,6 +834,7 @@ class File_Finder:
 
             self.file_paths.setdefault(filt, []).append(str(cal_path))
 
+        # All the seperate names/files we will need in our pipeline above
         for mode, attr in [
             ("1overf", "file_paths_1overf"),
             ("1overf_ap", "file_paths_1overf_ap"),
@@ -835,198 +855,3 @@ class File_Finder:
 
         return
 
-
-class GaussianPointSource:
-    """Generates a mock image containing a single 2D Gaussian point
-    source on top of a flat sky background, with optional Poisson shot
-    noise.
-    """
-
-    def __init__(
-        self,
-        shape=(101, 101),
-        amplitude=1000.0,
-        x0=None,
-        y0=None,
-        sigma=3.0,
-        background=50.0,
-        gain=2.0,
-        seed=42,
-    ):
-
-        self.shape = shape
-        self.amplitude = amplitude
-        self.x0 = shape[1] / 2.0 if x0 is None else x0
-        self.y0 = shape[0] / 2.0 if y0 is None else y0
-        self.sigma = sigma
-        self.background = background
-        self.gain = gain
-        self.rng = np.random.default_rng(seed)
-
-    def true_flux(self):
-        """
-        Analytic total flux of the Gaussian source
-        """
-        return self.amplitude * 2.0 * np.pi * self.sigma**2
-
-    def encircled_energy(self, radius):
-        return 1.0 - np.exp(-(radius**2) / (2.0 * self.sigma**2))
-
-    def _gaussian_signal(self):
-        ny, nx = self.shape
-        y, x = np.mgrid[0:ny, 0:nx]
-        r2 = (x - self.x0[:, np.newaxis, np.newaxis]) ** 2 + (
-            y - self.y0[:, np.newaxis, np.newaxis]
-        ) ** 2
-        return np.sum(self.amplitude * np.exp(-r2 / (2.0 * self.sigma**2)), axis=0)
-
-    def _bgd_noise(self):
-
-        # Source - https://stackoverflow.com/a/63868276
-        # Posted by Igor
-        # Retrieved 2026-09-11, License - CC BY-SA 4.0
-
-        # Compute filter kernel with radius correlation_scale (can probably be a bit smaller)
-        correlation_scale = self.shape[0] / 2
-        x = np.arange(-correlation_scale, correlation_scale)
-        y = np.arange(-correlation_scale, correlation_scale)
-        X, Y = np.meshgrid(x, y)
-        dist = np.sqrt(X * X + Y * Y)
-        filter_kernel = np.exp(-(dist**2) / (2 * correlation_scale))
-
-        n = self.shape[0]
-        noise = np.random.randn(n, n)
-        noise = scipy.signal.fftconvolve(noise, filter_kernel, mode="same")
-        return self.background * ((noise - noise.min()) / (noise.max() - noise.min()))
-
-    def clean_image(self):
-        """
-        Noiseless image
-        """
-        return self._gaussian_signal() + self.background
-
-    def noisy_image(self):
-        """
-        simple noise model:
-        Poisson shot noise on the (source + background)
-        """
-        clean_adu = self.clean_image()
-
-        electrons = clean_adu * self.gain
-        noisy_electrons = self.rng.poisson(electrons).astype(float)
-        noisy_bgd = self._bgd_noise()
-        return noisy_electrons / self.gain + noisy_bgd
-
-    def save_fits(self, filename, noisy=False, overwrite=True):
-        """Write the image to a FITS file, with the
-        ground-truth parameters recorded in the header for reference.
-        """
-        data = self.noisy_image() if noisy else self.clean_image()
-        hdu = fits.PrimaryHDU(data.astype(np.float32))
-        hdr = hdu.header
-        hdr["SIGMA"] = (self.sigma, "Gaussian sigma [pix]")
-        hdr["AMP"] = (self.amplitude, "Gaussian peak amplitude [ADU]")
-        # hdr["XTRUE"]        = (self.x0, "true x centroid [pix]")
-        # hdr["YTRUE"]        = (self.y0, "true y centroid [pix]")
-        hdr["BKG"] = (self.background, "flat sky background [ADU]")
-        hdr["GAIN"] = (self.gain, "e-/ADU")
-        hdr["TRUFLUX"] = (self.true_flux(), "analytic total source flux [ADU]")
-        hdr["NOISY"] = (noisy, "was noise injected?")
-
-        hdu.writeto(filename, overwrite=overwrite)
-        return Path(filename)
-
-    def write_source_list(self, filename, overwrite=True):
-        """
-        Write a minimal binary-table FITS source list containing
-        just the one known-true centroid, in the xcentroid/ycentroid
-        column format starbug2's aperture photometry routine expects.
-        """
-        t = Table()
-        t["xcentroid"] = list(self.x0)
-        t["ycentroid"] = list(self.y0)
-        t.write(filename, format="fits", overwrite=overwrite)
-        return Path(filename)
-
-    def plot_cal_steps(
-        self,
-        noisy_fits,
-        bgd_fits=None,
-        ap_table=None,
-        apphot_r=None,
-        sky_rin=None,
-        sky_rout=None,
-        save=False,
-        save_dir="Plots",
-    ):
-
-        fig = plt.figure(figsize=(21, 7))
-        gs = gridspec.GridSpec(1, 3, figure=fig, wspace=0.0, hspace=0.0)
-        ax0 = fig.add_subplot(gs[0, 0])
-        ax1 = fig.add_subplot(gs[0, 1])
-        ax2 = fig.add_subplot(gs[0, 2])
-
-        cmap = "inferno"
-        noisy = fits.open(noisy_fits)[0].data
-
-        interval = ZScaleInterval()
-        vmin, vmax = interval.get_limits(noisy)
-
-        ax0.imshow(noisy, cmap=cmap, vmin=vmin, vmax=vmax, origin="lower")
-
-        bgd = fits.open(bgd_fits)[1].data
-
-        ax1.imshow(bgd, cmap=cmap, vmin=vmin, vmax=vmax, origin="lower")
-
-        subtracted = noisy - bgd
-        ax2.imshow(subtracted, cmap=cmap, vmin=vmin, vmax=vmax, origin="lower")
-
-        fontsize = 26
-        ax0.set_title("Mock (noisey))", fontsize=fontsize)
-        ax1.set_title("Background only (sb2 result)", fontsize=fontsize)
-        ax2.set_title("Background calibrated (Mock - Bgd)", fontsize=fontsize)
-
-        for ax in [ax0, ax1, ax2]:
-            ax.set_yticklabels([])
-            ax.set_xticklabels([])
-
-        if save:
-            Path(save_dir).mkdir(exist_ok=True)
-            plt.savefig(f"{save_dir}/gaussian_cal_steps.pdf", bbox_inches="tight")
-        plt.show()
-        return
-
-
-def load_starbug_params(file_path):
-    """
-    READS StarBugII .param file
-    """
-    params = {}
-
-    with open(file_path, "r") as file:
-        for line in file:
-            clean_line = line.strip()
-
-            if not clean_line or clean_line.startswith("//"):
-                continue
-
-            # Starbug2 : 'key = value // comment'
-            if "=" in clean_line:
-                key_part, rest = clean_line.split("=", 1)
-                key = key_part.strip()
-
-                # Remoce inline comments
-                value_part = rest.split("//")[0].strip()
-
-                # Datatype convertion (float, int of string)
-                try:
-                    if "." in value_part:
-                        value = float(value_part)
-                    else:
-                        value = int(value_part)
-                except ValueError:
-                    value = value_part
-
-                params[key] = value
-
-    return params
