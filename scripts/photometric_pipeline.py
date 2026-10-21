@@ -1,114 +1,70 @@
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-# Author    : Luka Slagter
-# Goal      : Data pipeline for level 2 JWST observations of NGC 346 (proposal #1227)
+#!/usr/bin/env python
+import os, sys, subprocess
+import tqdm
 
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-import os
+from pathlib import Path
+import numpy as np
 
-# os.chdir("/home/slagter/Astronomy_master/STRW-MSC/SF_in_NGC/scripts")
-from scripts.image1overf import sub1fimaging
+import matplotlib.pyplot as plt, matplotlib.gridspec as gridspec
+from matplotlib.collections import EllipseCollection
+from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes, mark_inset
+from matplotlib.patches import Circle
+from matplotlib.colors import LogNorm
+plt.style.use("/home/slagter/Astronomy_master/STRW-MSC/stylish.mplstyle")
 
+
+import astropy.units as u, astropy.constants as const
+from astropy.table import Table
+from astropy.visualization import ZScaleInterval
+from astropy.io import fits
+from astropy import wcs
+from astropy.wcs.utils import proj_plane_pixel_scales, skycoord_to_pixel
+from astropy.stats import SigmaClip
+from astropy.convolution import Gaussian2DKernel, convolve
+from astropy.coordinates import SkyCoord
+from astropy.nddata import extract_array
+from astropy.visualization import simple_norm, LinearStretch
+
+import jhat
+import scipy.signal
 os.chdir("/home/slagter/Astronomy_master/STRW-MSC/SF_in_NGC")
 os.environ["CRDS_PATH"] = os.path.expanduser("~/crds_cache")
 os.environ["CRDS_CONTEXT"] = "jwst_1584.pmap"
 os.environ["CRDS_SERVER_URL"] = "https://jwst-crds.stsci.edu"
-
-
-import numpy as np, matplotlib.pyplot as plt, matplotlib.gridspec as gridspec, astropy.units as u, astropy.constants as const, os, sys
-import tqdm
-
-plt.style.use("/home/slagter/Astronomy_master/STRW-MSC/stylish.mplstyle")
-from astropy.table import Table
-from astropy.table import Table
-
-from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes, mark_inset
-from scipy.spatial import KDTree
-from matplotlib.patches import Circle
-from astropy.visualization import ZScaleInterval
-from astropy.io import fits
-from pathlib import Path
-from matplotlib.colors import LogNorm
-from astropy import wcs
-from astropy.wcs.utils import proj_plane_pixel_scales
-
-# 1/f calibration
-
-import subprocess
-
-from matplotlib.collections import EllipseCollection
-
-# CRDS pathing etc.
-from astropy.coordinates import SkyCoord
-import astropy.units as u
-from astropy.io import fits
-from astropy.wcs.utils import skycoord_to_pixel
-
-from astropy.nddata import extract_array
-from astropy.visualization import simple_norm, LinearStretch
-import jhat
-import scipy.signal
 
 import jwst
 from jwst.pipeline import Image3Pipeline
 from jwst.associations import asn_from_list
 from jwst.associations.lib.rules_level3_base import DMS_Level3_Base
 
-wcs_align = jhat.st_wcs_align()
-verbose = 2
-wcs_align.verbose = verbose
+# is now in the .background / .segmentation thingy...
+from photutils.background import Background2D, MedianBackground
+from photutils.segmentation import detect_sources, make_2dgaussian_kernel
+from jwst.datamodels import dqflags
+from copy import deepcopy
 
-new_line = "\n"
-
-
-class Read_Catalogue:
-    def __init__(
-        self,
-        catalogue_path="Photometry/NGC346_NIRCam_and_MIRI_Public_JWST_Catalogue.fits",
-    ):
-        self.catalogue_path = catalogue_path
-        self.catalogue = fits.open(catalogue_path)
-        self.cat_data = self.catalogue[1].data
-        return
-
-    def show_headers(self):
-        """
-        show headers of the catalogue
-        """
-        with fits.open(self.catalogue_path) as hdulist:
-            for i, hdu in enumerate(hdulist):
-                print(f"--- HEADER EXTENSIE {i} ({hdu.name}) ---")
-                print(repr(hdu.header))
-                print("\n" + "=" * 40 + "\n")
-        return
-
-    def mask_region(self, RA, DEC):
-        """
-        Zoom in to specified region (cutout in RA and DEC)
-        """
-        self.cat_mask = (
-            (self.cat_data["RA"] <= RA[1]) & (self.cat_data["RA"] >= RA[0])
-        ) & ((self.cat_data["DEC"] <= DEC[1]) & (self.cat_data["DEC"] >= DEC[0]))
-        self.sub_cat_data = self.cat_data[self.cat_mask]
-        return
-
+# ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= =======
+# Data reduction pipeline for level 2 data, single dither or full mosaic
+# ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= =======
 
 class Pipeline_level_2_data:
     """
     Helper class build around the in/output of starbug2
     """
-
     def __init__(self, working_directory=""):
         self.wdir = working_directory
         self.files = File_Finder(self.wdir)
         self.files.find_calibrated_filenames()
         self.IMAGE_TYPES = ("bgsub", "cal", "1overf", "background")
+        
+        self.catalogue_path  =  'Photometry/NGC346_NIRCam_and_MIRI_Public_JWST_Catalogue.fits'
+        self.Catalogue      = Read_Catalogue(catalogue_path = self.catalogue_path)
 
-        print("Initialized data in", self.files.current_filters)
+        print("Initialized filepaths for : ", self.files.current_filters)
 
     # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     # (1) Full pipeline
     # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-
     def run_pipeline_all(
         self,
         filt="",
@@ -200,10 +156,10 @@ class Pipeline_level_2_data:
         detection_sigma=2.0,
         overwrite_always_run=False,
         save=False,
+        known_sources = False
     ):
 
         filt1 = "F115W"
-        filt2 = "F187N"
 
         self.aperture_data = {}
         self.wcs_align = {}
@@ -211,7 +167,7 @@ class Pipeline_level_2_data:
         self.world_coord_sources = {}
         self.magnitudes = {}
 
-        for filt in [filt1, filt2]:
+        for filt in [filt1]:
             print(f"Running for {filt}...")
 
             if (
@@ -230,16 +186,17 @@ class Pipeline_level_2_data:
                 self.assign_WCS_from_gaia_dr3(IMAGE_INDEX=IMAGE_INDEX, filter=filt)
 
             print(f"    (3) Running starbug")
-            self.starbug2_aperture_photometry(
-                IMAGE_INDEX=IMAGE_INDEX,
-                filter=filt,
-                remove_background=True,
+            self.starbug2_aperture_photometry_on_dither(
+                IMAGE_INDEX         =IMAGE_INDEX,
+                filter              =filt,
+                remove_background   =True,
                 toggle_sb_output_txt=True,
                 overwrite_always_run=overwrite_always_run,
+                known_sources       = known_sources
             )
 
             self.aperture_data[filt] = fits.open(
-                self.files.file_paths_1overf_ap[filt][IMAGE_INDEX]
+                self.files.file_paths_jhat_ap[filt][IMAGE_INDEX]
             )[1].data
 
             # Use the gaia wcs of the image
@@ -248,29 +205,18 @@ class Pipeline_level_2_data:
                 filter=filt,
             )
             # Pixel coordinates of detected sources
-            self.pixel_coord_sources[filt], self.magnitudes[filt] = (
+            self.pixel_coord_sources[filt],  self.world_coord_sources[filt] ,self.magnitudes[filt] = (
                 self._collect_detections_mag_limited(
-                    filename_ap=self.files.file_paths_1overf_ap[filt][IMAGE_INDEX],
+                    filename_ap=self.files.file_paths_jhat_ap[filt][IMAGE_INDEX],
                     filter=filt,
                     detection_sigma=detection_sigma,
                 )
-            )
-            self.world_coord_sources[filt] = self._transform_detection_pixel_to_world(
-                wcs=self.wcs_align[filt], pixel_coords=self.pixel_coord_sources[filt]
             )
 
             if save == True:
                 self.plot_cal_steps_per_filter(
                     IMAGE_INDEX=IMAGE_INDEX, filter=filt, save=save
                 )
-
-        # _, _ , valid1, valid2   = self.cross_match_detections(self.world_coord_sources[filt1], self.world_coord_sources[filt2], det_tol=1e-5)
-        # filters = [filt1, filt2]
-        # validations = [valid1, valid2]
-        # self.magnitudes = {}
-        # for filt, valid in zip(filters, validations):
-
-        #     self.magnitudes[filt] = self.aperture_data[filt][filt][valid]
 
         print("----Pipeline-----")
         self.find_calibration_versions(self.files.file_paths_1overf[filt][IMAGE_INDEX])
@@ -280,7 +226,6 @@ class Pipeline_level_2_data:
     # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     # (2) 1/f calibration
     # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-
     def find_calibration_versions(self, filename):
         """
         print the used pipeline versions
@@ -383,13 +328,19 @@ class Pipeline_level_2_data:
         """
         Collects the x and y position alongside the magnitude error of detected sources from a starbug2 aperture photometry result file.
         """
-        x_positions_sources = fits.open(filename_ap)[1].data[f"xcentroid"]
-        y_positions_sources = fits.open(filename_ap)[1].data[f"ycentroid"]
-        magnitude_sources = fits.open(filename_ap)[1].data[filter]
+        x_positions_sources     = fits.open(filename_ap)[1].data[f"xcentroid"]
+        y_positions_sources     = fits.open(filename_ap)[1].data[f"ycentroid"]
+        RA_position             = fits.open(filename_ap)[1].data[f"RA"]
+        DEC_position            = fits.open(filename_ap)[1].data[f"DEC"]
+        flag_sources            = fits.open(filename_ap)[1].data[f"flag"]
+        magnitude_sources       = fits.open(filename_ap)[1].data[filter]
         magnitude_error_sources = fits.open(filename_ap)[1].data["e" + filter]
         return (
             x_positions_sources,
             y_positions_sources,
+            RA_position,
+            DEC_position,
+            flag_sources,
             magnitude_sources,
             magnitude_error_sources,
         )
@@ -399,14 +350,16 @@ class Pipeline_level_2_data:
         Provides the x and y-pixel positions of all detected sources from a starbug2 aperture file.
         Additionally outputs mask filtering which detections are below the provided maximal error in magnitude
         """
-        x_positions_sources, y_positions_sources, magnitude, magnitude_error_sources = (
+        x_positions_sources, y_positions_sources, RA_position, DEC_position, flag_sources, magnitude, magnitude_error_sources = (
             self._read_fits_detections(filename_ap=filename_ap, filter=filter)
         )
-        detection_mask = magnitude_error_sources <= detection_sigma
-        return (
-            x_positions_sources[detection_mask],
-            y_positions_sources[detection_mask],
-        ), magnitude[detection_mask]
+        print(np.unique(flag_sources))
+        detection_mask = (magnitude_error_sources <= detection_sigma) & (flag_sources == 0)
+        return ((x_positions_sources[detection_mask],
+                y_positions_sources[detection_mask]),
+                (RA_position[detection_mask],
+                DEC_position[detection_mask]),
+                magnitude[detection_mask])
 
     def _transform_detection_pixel_to_world(self, wcs, pixel_coords):
         """
@@ -489,7 +442,6 @@ class Pipeline_level_2_data:
     # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     # (3) Aperture photometry / source detection with STARBUG2
     # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-
     def _run_starbug2(self, cmd, toggle_sb_output_txt):
         """
         Performs starbug2 aperture photometry using subproccess
@@ -502,7 +454,7 @@ class Pipeline_level_2_data:
             result.check_returncode()
 
         if toggle_sb_output_txt == True:
-            print(result.stdout)
+            print(result.stdout)    # prints the starbug2 terminal output :D
             print("---------------------------")
             print()
         return
@@ -519,24 +471,92 @@ class Pipeline_level_2_data:
                 + mode
                 + ".param"
             )
-
         else:
             return
 
-    def starbug2_aperture_photometry(
+
+    def _get_cmd_unknown_sources(self, starbug_path, IMAGE_INDEX, filter ):
+        return  [   starbug_path,
+                    "-vBD",
+                    "-p", #Work with own parameters files based on filter and exposure time (see jeroen)
+                    self._determine_filename_sb2_param(filter, mode="long"),
+                    self.files.file_paths_1overf_jhat[filter][IMAGE_INDEX],
+                ]
+
+    def _make_pos_good_sources(self, filter):
+        return self.Catalogue.make_source_list( filt_mask_on = (filter, 2.0),  outfile = 'Photometry/test_pos.fits')
+    
+    def _get_cmd_known_sources(self, starbug_path, source_path, filter, IMAGE_INDEX):
+
+        return  [   starbug_path,
+                    "-d",
+                    source_path,
+                    "-p", #Work with own parameters files based on filter and exposure time (see jeroen)
+                    self._determine_filename_sb2_param(filter, mode="long"),
+                    "-AB",
+                    self.files.file_paths_1overf_jhat[filter][IMAGE_INDEX],
+                ]
+
+    def starbug2_aperture_photometry_on_dither(
         self,
         IMAGE_INDEX,
         filter,
+        mode="short",
+        remove_background=True,
+        toggle_sb_output_txt=True,
+        overwrite_always_run=False,
+        known_sources = False,
+    ):
+        """
+        Run aperture photomety starbug2 using subprocceses.
+
+        IF: 1) Wesults are not yet present   
+            2) 'overwrite_always_run' is true
+
+        """
+        starbug_path = "/net/vdesk/data2/slagter/environment_path/SB_venv/bin/starbug2"
+        cmd               = self._get_cmd_unknown_sources(starbug_path, IMAGE_INDEX, filter )
+        
+        if known_sources == True:
+            # Switch to the cmd for known source list
+            source_path       = self._make_pos_good_sources(filter)
+            cmd_known_sources = self._get_cmd_known_sources(starbug_path, source_path, filter, IMAGE_INDEX)
+            cmd = cmd_known_sources
+
+        if overwrite_always_run:
+            self._run_starbug2(cmd, toggle_sb_output_txt)
+
+        # checking for existing files
+        else:
+            ap_exists = Path(
+                self.files.file_paths_jhat_ap[filter][IMAGE_INDEX]
+            ).exists()
+            bgd_exists = Path(
+                self.files.file_paths_jhat_bgd[filter][IMAGE_INDEX]
+            ).exists()
+
+            if ap_exists and bgd_exists:
+                print("Skipping starbug2 run")
+            else:
+                self._run_starbug2(cmd, toggle_sb_output_txt)
+        return print("--- Running stargbug finalized ---")
+
+
+    def starbug2_aperture_photometry_on_mosaic(
+        self,
+        mosaic_path,
+        filter,
+        mode="short",
         remove_background=True,
         toggle_sb_output_txt=True,
         overwrite_always_run=False,
     ):
         """
-        Wrapper function with standard file paths and cmd lines to run aperture photomety starbug2 using subprocceses.
+        Run aperture photomety starbug2 using subprocceses.
 
-        only does aperture photometry if results are not yet present or the overwrite always.is true
+        IF: 1) Wesults are not yet present   
+            2) 'overwrite_always_run' is true
 
-        parameter file should exist, and have to correct naming convention for each filter!
         """
         starbug_path = "/net/vdesk/data2/slagter/environment_path/SB_venv/bin/starbug2"
         mode = "-vBD" if remove_background else "-vD"
@@ -544,28 +564,30 @@ class Pipeline_level_2_data:
         cmd = [
             starbug_path,
             mode,
-            "-p",
-            self._determine_filename_sb2_param(filter),
-            self.files.file_paths_1overf[filter][IMAGE_INDEX],
+            "-p",                                                           #Work with own parameters files based on filter and exposure time (see jeroen)
+            self._determine_filename_sb2_param(filter, mode="short"),
+            mosaic_path,
         ]
 
         if overwrite_always_run:
             self._run_starbug2(cmd, toggle_sb_output_txt)
-        else:
-            ap_exists = Path(
-                self.files.file_paths_1overf_ap[filter][IMAGE_INDEX]
-            ).exists()
-            bgd_exists = Path(
-                self.files.file_paths_1overf_bgd[filter][IMAGE_INDEX]
-            ).exists()
+        # else:
+        #     ap_exists = Path(
+        #         self.files.file_paths_1overf_ap[filter][IMAGE_INDEX]
+        #     ).exists()
+        #     bgd_exists = Path(
+        #         self.files.file_paths_1overf_bgd[filter][IMAGE_INDEX]
+        #     ).exists()
 
-            if ap_exists and bgd_exists:
-                print("Skipping starbug2 run")
-            elif ap_exists and remove_background == False:
-                print("Skipping starbug2 run")
-            else:
-                self._run_starbug2(cmd, toggle_sb_output_txt)
+        #     if ap_exists and bgd_exists:
+        #         print("Skipping starbug2 run")
+        #     elif ap_exists and remove_background == False:
+        #         print("Skipping starbug2 run")
+        #     else:
+        #         self._run_starbug2(cmd, toggle_sb_output_txt)
+        return print("--- Running stargbug finalized ---")
 
+    
     # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     # (4) Plotting functions
     # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -655,21 +677,15 @@ class Pipeline_level_2_data:
             if image_type == "cal":
                 img = self._collect_image(f.file_paths[filt][IMAGE_INDEX])
             elif image_type == "1overf":
-                img = self._collect_image(f.file_paths_1overf[filt][IMAGE_INDEX])
+                img = self._collect_image(f.file_paths_1overf_jhat[filt][IMAGE_INDEX])
             elif image_type == "background":
-                img = self._collect_image(f.file_paths_1overf_bgd[filt][IMAGE_INDEX])
+                img = self._collect_image(f.file_paths_jhat_bgd[filt][IMAGE_INDEX])
             else:  # 'bgsub'
                 img = self._collect_image(
-                    f.file_paths_1overf[filt][IMAGE_INDEX]
-                ) - self._collect_image(f.file_paths_1overf_bgd[filt][IMAGE_INDEX])
+                    f.file_paths_1overf_jhat[filt][IMAGE_INDEX]
+                ) - self._collect_image(f.file_paths_jhat_bgd[filt][IMAGE_INDEX])
             vmin, vmax = ZScaleInterval().get_limits(img)
             return img, vmin, vmax
-
-        # check thingy
-        if image_type not in self.IMAGE_TYPES:
-            raise ValueError(
-                f"Unknown image : '{image_type}'. Use one of {self.IMAGE_TYPES}."
-            )
 
         tags = []
         if draw_own_detections:
@@ -688,25 +704,39 @@ class Pipeline_level_2_data:
             "background": "background only",
         }[image_type]
 
-        title = title + " " + tag
+        dra         = 1 * u.arcmin
+        ddec        = 0 * u.arcmin
+        rot         = 0 * u.deg                    
+        width       = 2 * u.arcmin                
+        height      = 2 * u.arcmin
+        pix_scale   = 0.5 * u.arcsec
+
+
+        title = title + " " + tag 
         for filt in filters:
+
             if filt not in self.wcs_align:
                 raise KeyError(
                     f"'{filt}' has no WCS yet - run run_pipeline()...) first! "
                 )
+            img, vmin, vmax = _load_image(filt)
+                
+            center = find_center(*img.shape, wcs= self.wcs_align[filt])
+            print(center)
+            target, shape_out = make_target_wcs(center, dra, ddec, rot, width, height, pix_scale)
+
 
             fig = plt.figure()
             gs = gridspec.GridSpec(1, 1, figure=fig)  # once, before the loop
 
-            ax = fig.add_subplot(gs[0, 0], projection=self.wcs_align[filt])
+            ax = fig.add_subplot(gs[0, 0], projection=target)
 
-            img, vmin, vmax = _load_image(filt)
-
+   
             ax.imshow(img, cmap="bone", vmin=vmin, vmax=vmax, origin="lower")
 
-            def _draw_markers(ax, x, y, r, img_shape, label):
+            def _draw_markers(ax, x, y, r):
                 """Detections; points are dropped if not in frame"""
-                ok = (x >= 0) & (x < img_shape[1]) & (y >= 0) & (y < img_shape[0])
+                import matplotlib.patches as mpatches
 
                 ax.add_collection(
                     EllipseCollection(
@@ -714,22 +744,13 @@ class Pipeline_level_2_data:
                         2 * r,
                         0,
                         units="xy",
-                        offsets=np.c_[x[ok], y[ok]],
+                        offsets=np.c_[x, y],
                         offset_transform=ax.transData,  # transOffset= on matplotlib < 3.6
                         fc="none",
                         ec="magenta",
-                        lw=1,
-                        label=label,
-                    )
-                )
+                        lw=1))
 
-            if draw_own_detections:
-                x, y = self.pixel_coord_sources[filt]
-                _draw_markers(ax, x, y, marker_radius_pixel, img.shape, "detections")
-
-            else:
-                x, y = self.wcs_align[filt].world_to_pixel_values(*specific_ra_dec)
-                _draw_markers(ax, x, y, marker_radius_pixel, img.shape, "catalogue")
+                return 
 
             if region is not None:
                 pixel_xmin, pixel_ymin = self.wcs_align[filt].world_to_pixel_values(
@@ -738,16 +759,31 @@ class Pipeline_level_2_data:
                 pixel_xmax, pixel_ymax = self.wcs_align[filt].world_to_pixel_values(
                     region[0, 1], region[1, 1]
                 )
+                pixel_xmin, pixel_xmax = sorted([pixel_xmin, pixel_xmax])
+                pixel_ymin, pixel_ymax = sorted([pixel_ymin, pixel_ymax])
 
                 ax.set_xlim(pixel_xmin, pixel_xmax)
                 ax.set_ylim(pixel_ymin, pixel_ymax)
 
-            ax.coords["dec"].set_ticks(spacing=50 * u.arcsec)
-            ax.coords["ra"].set_ticks(spacing=50 * u.arcsec)
+            if draw_own_detections:
+                obs_x, obs_y            = self.pixel_coord_sources[filt]
+                sky = self.wcs_align[filt].pixel_to_world(obs_x, obs_y)
+                x, y = target.world_to_pixel(sky)
+            else:
+                ra, dec = specific_ra_dec[0], specific_ra_dec[1]
+                x, y = target.world_to_pixel(ra, dec)
+            
+            n_y, n_x = shape_out
+            m = np.isfinite(x) & np.isfinite(y) & (x >= -0.5) & (x <= n_x-0.5) & (y >= -0.5) & (y <= n_y-0.5)
+            x, y = x[m], y[m]
+            
+            _draw_markers(ax, x, y, marker_radius_pixel)
+            N_source = len(m)
+            # ax.coords["dec"].set_ticks(spacing=50 * u.arcsec)
+            # ax.coords["ra"].set_ticks(spacing=50 * u.arcsec)
             ax.set_xlabel("")
             ax.set_ylabel("")
-            ax.set_title(title)
-            ax.legend(loc="upper right")
+            ax.set_title(title + ' N_source =' + str(N_source))
 
             fig.tight_layout()
 
@@ -807,6 +843,11 @@ class File_Finder:
             name = input_cal_file.replace("_cal.fits", "_cal_1overf_cal-ap.fits")
         elif mode == "jhat":
             name = input_cal_file.replace("_cal.fits", "_cal_1overf_jhat.fits")
+        elif mode == "jhat_ap":
+            name = input_cal_file.replace("_cal.fits", "_cal_1overf_jhat-ap.fits")
+        elif mode == "jhat_bg":
+            name = input_cal_file.replace("_cal.fits", "_cal_1overf_jhat-bgd.fits")
+
 
         else:
             print(f"{mode} is not valid")
@@ -814,44 +855,192 @@ class File_Finder:
         return name
 
     def find_calibrated_filenames(self):
-        """
-        Read the directory for all files. read the filter from the fits file and store appropriately per filter.
-        """
+            """
+            Read the directory for all files. read the filter from the fits file and store appropriately per filter.
+            """
 
-        self.current_filters = []
-        for dir_path in sorted(p for p in self.wdir.iterdir() if p.is_dir()):
-            cal_path = dir_path / f"{dir_path.name}_cal.fits"
-            if not cal_path.exists():
-                continue
+            self.current_filters = []
+            for dir_path in sorted(p for p in self.wdir.iterdir() if p.is_dir()):
+                cal_path = dir_path / f"{dir_path.name}_cal.fits"
+                if not cal_path.exists():
+                    continue
 
-            filt = self._filter_from_header(cal_path)
-            if filt not in self.current_filters:
-                self.current_filters.append(filt)
+                filt = self._filter_from_header(cal_path)
+                if filt not in self.current_filters:
+                    self.current_filters.append(filt)
 
-            if filt is None:
-                self.unmatched.append(str(cal_path))
-                continue
+                if filt is None:
+                    self.unmatched.append(str(cal_path))
+                    continue
 
-            self.file_paths.setdefault(filt, []).append(str(cal_path))
+                self.file_paths.setdefault(filt, []).append(str(cal_path))
 
-        # All the seperate names/files we will need in our pipeline above
-        for mode, attr in [
-            ("1overf", "file_paths_1overf"),
+            # All the seperate names/files we will need in our pipeline above
+            for mode, attr in [
+            ("1overf",    "file_paths_1overf"),
             ("1overf_ap", "file_paths_1overf_ap"),
             ("1overf_bg", "file_paths_1overf_bgd"),
-            ("jhat", "file_paths_1overf_jhat"),
-        ]:
-            setattr(
-                self,
-                attr,
-                {
-                    f: [self._change_extentions(name, mode=mode) for name in names]
-                    for f, names in self.file_paths.items()
-                },
+            ("jhat",      "file_paths_1overf_jhat"),
+            ("jhat_ap",   "file_paths_jhat_ap"),
+            ("jhat_bg",   "file_paths_jhat_bgd"),
+            ]:
+                setattr(
+                    self,
+                    attr,
+                    {
+                        f: [self._change_extentions(name, mode=mode) for name in names]
+                        for f, names in self.file_paths.items()
+                    },
+                )
+
+            if self.unmatched:
+                print(f"Warning: {len(self.unmatched)} files had no resolvable filter")
+
+            return
+
+
+# ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= =======
+# The following code is a direct copy from https://github.com/chriswillott/jwst/blob/master/image1overf.py
+# ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= =======
+def sub1fimaging(cal2hdulist, sigma_bgmask, sigma_1fmask, splitamps, usesegmask):
+    """
+    Determine a 1/f correction for JWST imaging data.
+    Input is a level 2 calibrated NIRISS or NIRCam image.
+    Subtracts a background and masks sources to determine 1/f stripes.
+    Assumes stripes are constant along full detector row, unless splitamps set to True.
+    Only does a correction for FULL (NIRCam and NIRISS) and SUB256 (NIRISS) subarrays.
+    Uses 'SLOWAXIS' keyword to determine detector orientation.
+
+    Output:
+    Returns data array of corrected image, not including the reference pixels
+
+    Parameters:
+    cal2hdulist - hdulist of the input level 2 calibrated image
+    sigma_bgmask - sigma of outliers for masking when making background  (suggested value=3.0)
+    sigma_1fmask - sigma of outliers for masking when making 1/f correction  (suggested value=2.0)
+    splitamps - fit each of the 4 amps separately when full-frame  (set this to True when the field is sparse)
+    usesegmask - whether to use a segmentation image as the mask before fitting 1/f stripes (recommend set to True in most cases)
+    """
+
+    # Check subarray type and extract non-reference pixels
+    if cal2hdulist["PRIMARY"].header["SUBARRAY"] == "FULL":
+        data = cal2hdulist["SCI"].data[4:2044, 4:2044]
+        dq = cal2hdulist["DQ"].data[4:2044, 4:2044]
+    elif cal2hdulist["PRIMARY"].header["SUBARRAY"] == "SUB256":
+        data = cal2hdulist["SCI"].data[:252, :252]
+        dq = cal2hdulist["DQ"].data[:252, :252]
+    else:
+        print(
+            "Will not do 1/f subtraction for subarray of type {}".format(
+                cal2hdulist["PRIMARY"].header["SUBARRAY"]
             )
+        )
+        return data
 
-        if self.unmatched:
-            print(f"Warning: {len(self.unmatched)} files had no resolvable filter")
+    slowaxis = abs(cal2hdulist["PRIMARY"].header["SLOWAXIS"])
 
-        return
+    # Get a mask of bad pixels from the DQ array
+    mask = np.zeros(data.shape, dtype=bool)
+    i_yy, i_xx = np.where((np.bitwise_and(dq, dqflags.group["DO_NOT_USE"]) == 1))
+    mask[i_yy, i_xx] = 1
 
+    # Make a flux distribution centered on the median that on the higher than median side is a reflection of the lower than median side.
+    # Assumption here is not huge variation in background across field, so median is a useful value of typical background level
+    # Note this mask is only used to generate the background model
+    gooddata = data[np.where(mask == 0)]
+    median = np.median(gooddata)
+    lowpixels = np.where(gooddata < median)
+    bgpixels = np.concatenate(
+        ((gooddata[lowpixels] - median), (median - gooddata[lowpixels]))
+    )
+    # Add to mask all pixels that have flux < or > 3sigma of this flux distribution
+    mask[np.where(data > (median + sigma_bgmask * np.std(bgpixels)))] = 1
+    mask[np.where(data < (median - sigma_bgmask * np.std(bgpixels)))] = 1
+
+    # testhdulist = deepcopy(cal2hdulist)
+    # testdata =  deepcopy(data)
+    # testdata[np.where(mask>0)] = 0.0
+    # testhdulist['SCI'].data = testdata
+    # testoutfile='testmaskinit.fits'
+    # testhdulist.writeto(testoutfile,overwrite=True)
+
+    # Do a background subtraction to separate background variations from 1/f stripe determination
+    sigma_clip_forbkg = SigmaClip(sigma=3.0, maxiters=5)
+    bkg_estimator = MedianBackground()
+    bkg = Background2D(
+        data,
+        (34, 34),
+        filter_size=(5, 5),
+        mask=mask,
+        sigma_clip=sigma_clip_forbkg,
+        bkg_estimator=bkg_estimator,
+    )
+    bksubdata = data - bkg.background
+
+    # Remake mask on background-subtracted data,
+    # Two options - use segmentation region on smoothed image
+    #            - use same method as before but now clipping at < or > sigma_1fmask sigma of the flux distribution
+    mask = np.zeros(data.shape, dtype=bool)
+    mask[i_yy, i_xx] = 1
+    if usesegmask:
+        # Before detection, smooth image with Gaussian FWHM = 5 pixels - this gives better balance between stars and BCGs because ghosts are more diffuse than stars
+        kernel = make_2dgaussian_kernel(5.0, size=5)
+        convolved_bksubdata = convolve(bksubdata, kernel)
+        bksubdata_masked = np.ma.masked_array(bksubdata, mask=mask)
+        clippedsigma = np.std(
+            sigma_clip_forbkg(bksubdata_masked, masked=True, copy=False)
+        )
+        # print (clippedsigma)
+        photthreshold = sigma_1fmask * clippedsigma
+        segm_detect = detect_sources(
+            convolved_bksubdata, photthreshold, mask=mask, npixels=7
+        )
+        segimage = segm_detect.data.astype(np.uint32)
+        mask[np.where(segimage > 0)] = 1
+    else:
+        gooddata = bksubdata[np.where(mask == 0)]
+        median = np.median(gooddata)
+        negpixels = np.where(gooddata < median)
+        bgpixels = np.concatenate(
+            ((gooddata[negpixels] - median), (median - gooddata[negpixels]))
+        )
+        mask[np.where(bksubdata > (median + sigma_1fmask * np.std(bgpixels)))] = 1
+        mask[np.where(bksubdata < (median - sigma_1fmask * np.std(bgpixels)))] = 1
+
+    # testdata =  deepcopy(bksubdata)
+    # testdata[np.where(mask>0)] = 0.0
+    # testhdulist['SCI'].data = testdata
+    # testhdulist['ERR'].data = segimage
+    # testoutfile='testmaskpostbkg_seg_sigma_1fmask0p7.fits'
+    # testhdulist.writeto(testoutfile,overwrite=True)
+
+    # Make masked array of background-subtracted data and then take median along columns (slowaxis=1) or rows (slowaxis=2)
+    # if splitamps is True and full frame then define sections of 4 amps and fit and subtract each separately
+    if splitamps == True and cal2hdulist["PRIMARY"].header["SUBARRAY"] == "FULL":
+        stripes = np.zeros(data.shape)
+        # define sections - sub off 4 because reference pixels already removed
+        loamp = np.array([4, 512, 1024, 1536]) - 4
+        hiamp = np.array([512, 1024, 1536, 2044]) - 4
+        numamps = loamp.size
+        for k in range(numamps):
+            if slowaxis == 1:
+                maskedbksubdata = np.ma.array(
+                    bksubdata[loamp[k] : hiamp[k], :], mask=mask[loamp[k] : hiamp[k], :]
+                )
+                stripes[loamp[k] : hiamp[k], :] = np.ma.median(
+                    maskedbksubdata, axis=(slowaxis - 1), keepdims=True
+                )
+            elif slowaxis == 2:
+                maskedbksubdata = np.ma.array(
+                    bksubdata[:, loamp[k] : hiamp[k]], mask=mask[:, loamp[k] : hiamp[k]]
+                )
+                stripes[:, loamp[k] : hiamp[k]] = np.ma.median(
+                    maskedbksubdata, axis=(slowaxis - 1), keepdims=True
+                )
+    else:
+        maskedbksubdata = np.ma.array(bksubdata, mask=mask)
+        stripes = np.ma.median(maskedbksubdata, axis=(slowaxis - 1), keepdims=True)
+
+    correcteddata = data - stripes
+
+    return correcteddata

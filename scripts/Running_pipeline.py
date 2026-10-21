@@ -1,7 +1,7 @@
 import os
 
 os.chdir("/home/slagter/Astronomy_master/STRW-MSC/SF_in_NGC")
-import phot_toolkits as phot_tk
+import SF_in_NGC.scripts.phot_toolkit as phot_tk
 
 # to_be_done_filters  = ['F356W', 'F150W', 'F212N',          '', '', 'F444W;F405N', 'F430M', 'F182M', 'F444W;F470N',          'F480M', 'F090W', '', '']
 
