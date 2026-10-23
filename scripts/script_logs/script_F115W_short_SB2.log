@@ -1,0 +1,4 @@
+nohup: ignoring input
+WARNING: AstropyDeprecationWarning: Module 'tweakwcs.tpwcs' has been deprecated since version 0.8.0. Please use corrector classes from the 'tweakwcs.correctors' module. [tweakwcs.tpwcs]
+**WARNING**: LOCAL JWST PRD VERSION PRDOPSSOC-073 DOESN'T MATCH THE CURRENT ONLINE VERSION PRDOPSSOC-075
+Please consider updating pysiaf, e.g. pip install --upgrade pysiaf or conda update pysiaf
