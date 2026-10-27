@@ -35,7 +35,9 @@ import jhat
 # from jwst.datamodels import dqflags
 # from copy import deepcopy
 
-
+catalogue_jeroen_path = "/home/slagter/Astronomy_master/STRW-MSC/SF_in_NGC/Photometry/catalogue_jeroen/NGC346_NIRCam_and_MIRI_Public_JWST_Catalogue.fits"
+download_wdir = "/net/vdesk/data2/slagter/"
+starbug_env_path= "/net/vdesk/data2/slagter/environment_path/SB_venv/bin/starbug2"
 
 
 
@@ -63,7 +65,7 @@ class Pipeline_level_2_data:
         self.files.find_calibrated_filenames()
         self.IMAGE_TYPES = ("bgsub", "cal", "1overf", "background")
 
-        self.catalogue_path = "/home/slagter/Astronomy_master/STRW-MSC/SF_in_NGC/Photometry/catalogue_jeroen/NGC346_NIRCam_and_MIRI_Public_JWST_Catalogue.fits"
+        self.catalogue_path = catalogue_jeroen_path
         self.Catalogue = PTK.Read_Catalogue(catalogue_path=self.catalogue_path)
 
         print("Initialized filepaths for : ", self.files.current_filters)
@@ -78,7 +80,7 @@ class Pipeline_level_2_data:
         Number_of_frames = 1#(len(self.files.file_paths_1overf[filt]))
         source_path = "/net/vdesk/data2/slagter/JWST_NIRCAM_#1227_level_3/F115W_merged_ap.fits"
         source_path =  "/home/slagter/Astronomy_master/STRW-MSC/SF_in_NGC/Photometry/catalogue_jeroen/positions_F115W.fits"
-        starbug_path = "/net/vdesk/data2/slagter/environment_path/SB_venv/bin/starbug2"
+
 
         for IMAGE_INDEX in tqdm.tqdm(
                    range(Number_of_frames), desc="(A) PSF photometry"
@@ -88,7 +90,7 @@ class Pipeline_level_2_data:
             bgdfile = self.files.file_paths_jhat_bgd[filt][IMAGE_INDEX]
 
             if Path(bgdfile).exists():
-                cmd = [starbug_path,
+                cmd = [starbug_env_path,
                 "-d",source_path,
                 "-p", self._determine_filename_sb2_param(filt, mode="long"), # for here mode doesnt matter as we have given fixed source list.
                 "-s", "DPOS_THRESH=0.1", 
@@ -121,7 +123,7 @@ class Pipeline_level_2_data:
             "Association file": False,
             "Image3Pipeline": False,
         },
-        output_dir="/net/vdesk/data2/slagter/JWST_NIRCAM_#1227_level_3",
+        output_dir= download_wdir + "/JWST_NIRCAM_#1227_level_3",
     ):  # standard level 3 output directory for all frames!
 
         print(f"----Initializing Pipeline for {filt}---------")
@@ -607,15 +609,13 @@ class Pipeline_level_2_data:
             2) 'overwrite_always_run' is true
 
         """
-
-        starbug_path = "/net/vdesk/data2/slagter/environment_path/SB_venv/bin/starbug2"
-        cmd = self._get_cmd_unknown_sources(starbug_path, IMAGE_INDEX, filter)
+        cmd = self._get_cmd_unknown_sources(starbug_env_path, IMAGE_INDEX, filter)
 
         if known_sources == True:
             # Switch to the cmd for known source list
             source_path       = self._make_pos_good_sources(filter)
             cmd_known_sources = self._get_cmd_known_sources(
-                starbug_path, source_path, filter, IMAGE_INDEX
+                starbug_env_path, source_path, filter, IMAGE_INDEX
             )
             cmd = cmd_known_sources
 
@@ -655,11 +655,10 @@ class Pipeline_level_2_data:
             2) 'overwrite_always_run' is true
 
         """
-        starbug_path = "/net/vdesk/data2/slagter/environment_path/SB_venv/bin/starbug2"
 
         #Just let it detect with the param file (see git for jeroens catalogue thingy)
         cmd = [
-            starbug_path,
+            starbug_env_path,
             "-p",  # Work with own parameters files based on filter and exposure time (see jeroen)
             self._determine_filename_sb2_param(filter, mode=mode),
             "-vDA", # v = verbose, D = detect with the parameter file!, A= aperture photometry
@@ -678,7 +677,7 @@ class Pipeline_level_2_data:
         return fits.open(filename)[1].data
 
     def plot_cal_steps_per_filter(self, IMAGE_INDEX, filter, save=False):
-        os.chdir("/home/slagter/Astronomy_master/STRW-MSC/SF_in_NGC")
+        os.chdir(self.wdir)
 
         fig = plt.figure(figsize=(30, 7))
         gs = gridspec.GridSpec(1, 4, figure=fig, wspace=0.0, hspace=0.0)
