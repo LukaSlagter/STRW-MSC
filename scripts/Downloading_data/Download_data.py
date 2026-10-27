@@ -1,12 +1,22 @@
 import os
 from astroquery.mast import Observations
 import sys
-
+import argparse
 telescope = "JWST"
 instrument_name = "NIRCAM*"
 program_id = "1227"
 
-folder = "/net/vdesk/data2/slagter/"
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Run StarBugII aperture photometry on a JWST NIRCam mosaic."
+    )
+    parser.add_argument("--output_folder", required=True, help="output folder...")
+    return parser.parse_args()
+
+args = parse_args()
+
+folder = args.output_folder
 sys.path.append(folder)
 dir_name = f"{telescope}_NIRCAM_#{program_id}_level_2"
 os.makedirs(folder + dir_name, exist_ok=True)
