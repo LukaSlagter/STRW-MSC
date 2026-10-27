@@ -67,7 +67,7 @@ class Pipeline_level_2_data:
                 "-vP", cal_file,
                 ]
             else:
-                cmd = [starbug_path,
+                cmd = [STARBUG2_BIN,
                                 "-d",source_path,
                                 "-p", self._determine_filename_sb2_param(filt, mode="long"), # for here mode doesnt matter as we have given fixed source list.
                                 "-s", "DPOS_THRESH=0.1", 
@@ -745,7 +745,6 @@ def sub1fimaging(cal2hdulist, sigma_bgmask, sigma_1fmask, splitamps, usesegmask)
     from photutils import Background2D, MedianBackground
     from photutils.segmentation import detect_sources, make_2dgaussian_kernel
     from jwst.datamodels import dqflags
-    from copy import deepcopy
 
 
     # Check subarray type and extract non-reference pixels
@@ -782,13 +781,6 @@ def sub1fimaging(cal2hdulist, sigma_bgmask, sigma_1fmask, splitamps, usesegmask)
     # Add to mask all pixels that have flux < or > 3sigma of this flux distribution
     mask[np.where(data > (median + sigma_bgmask * np.std(bgpixels)))] = 1
     mask[np.where(data < (median - sigma_bgmask * np.std(bgpixels)))] = 1
-
-    # testhdulist = deepcopy(cal2hdulist)
-    # testdata =  deepcopy(data)
-    # testdata[np.where(mask>0)] = 0.0
-    # testhdulist['SCI'].data = testdata
-    # testoutfile='testmaskinit.fits'
-    # testhdulist.writeto(testoutfile,overwrite=True)
 
     # Do a background subtraction to separate background variations from 1/f stripe determination
     sigma_clip_forbkg = SigmaClip(sigma=3.0, maxiters=5)
@@ -832,13 +824,6 @@ def sub1fimaging(cal2hdulist, sigma_bgmask, sigma_1fmask, splitamps, usesegmask)
         )
         mask[np.where(bksubdata > (median + sigma_1fmask * np.std(bgpixels)))] = 1
         mask[np.where(bksubdata < (median - sigma_1fmask * np.std(bgpixels)))] = 1
-
-    # testdata =  deepcopy(bksubdata)
-    # testdata[np.where(mask>0)] = 0.0
-    # testhdulist['SCI'].data = testdata
-    # testhdulist['ERR'].data = segimage
-    # testoutfile='testmaskpostbkg_seg_sigma_1fmask0p7.fits'
-    # testhdulist.writeto(testoutfile,overwrite=True)
 
     # Make masked array of background-subtracted data and then take median along columns (slowaxis=1) or rows (slowaxis=2)
     # if splitamps is True and full frame then define sections of 4 amps and fit and subtract each separately
