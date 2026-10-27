@@ -12,7 +12,7 @@ from astropy.io import fits
 from astropy import wcs
 
 
-from config import (
+from Config import (
     CATALOGUE_JEROEN, POSITIONS_F115W, GAIA_CATALOGUE, MPLSTYLE,
     SB_PARAM_DIR, PHOT_DIR, PLOTS_DIR, LEVEL3_DIR, STARBUG2_BIN,
 )

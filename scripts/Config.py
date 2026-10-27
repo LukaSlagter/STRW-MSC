@@ -15,6 +15,7 @@ POSITIONS_F115W  = CAT_DIR / "positions_F115W.fits"
 GAIA_CATALOGUE   = PROJECT_ROOT / "ngc346_gaia_dr3_10arcmin_clean.txt"   
 MPLSTYLE         = PROJECT_ROOT.parent / "stylish.mplstyle"
 
+LEVEL2_DIR   = DATA_ROOT / "JWST_NIRCAM_#1227_level_2"
 LEVEL3_DIR   = DATA_ROOT / "JWST_NIRCAM_#1227_level_3"
 STARBUG2_BIN = Path(os.environ.get("STARBUG2_BIN",
                     DATA_ROOT / "environment_path/SB_venv/bin/starbug2"))
