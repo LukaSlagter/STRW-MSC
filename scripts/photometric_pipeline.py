@@ -1,54 +1,24 @@
 #!/usr/bin/env python
 import os, sys, subprocess
 import tqdm
-
 from pathlib import Path
 import numpy as np
 import phot_toolkit as PTK
-
 import matplotlib.pyplot as plt, matplotlib.gridspec as gridspec
 from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes, mark_inset
-
-plt.style.use("/home/slagter/Astronomy_master/STRW-MSC/stylish.mplstyle")
-
 import astropy.units as u, astropy.constants as const
 from astropy.visualization import ZScaleInterval
 from astropy.io import fits
 from astropy import wcs
 
-from astropy.stats import SigmaClip
-import jhat
 
-# os.chdir("/home/slagter/Astronomy_master/STRW-MSC/SF_in_NGC")
-# os.environ["CRDS_PATH"] = os.path.expanduser("~/crds_cache")
-# os.environ["CRDS_CONTEXT"] = "jwst_1584.pmap"
-# os.environ["CRDS_SERVER_URL"] = "https://jwst-crds.stsci.edu"
+from config import (
+    CATALOGUE_JEROEN, POSITIONS_F115W, GAIA_CATALOGUE, MPLSTYLE,
+    SB_PARAM_DIR, PHOT_DIR, PLOTS_DIR, LEVEL3_DIR, STARBUG2_BIN,
+)
 
-# import jwst
-# from jwst.pipeline import Image3Pipeline
-# from jwst.associations import asn_from_list
-# from jwst.associations.lib.rules_level3_base import DMS_Level3_Base
-
-# is now in the .background / .segmentation thingy...
-# from photutils.background import Background2D, MedianBackground
-# from photutils.segmentation import detect_sources, make_2dgaussian_kernel
-# from jwst.datamodels import dqflags
-# from copy import deepcopy
-
-catalogue_jeroen_path = "/home/slagter/Astronomy_master/STRW-MSC/SF_in_NGC/Photometry/catalogue_jeroen/NGC346_NIRCam_and_MIRI_Public_JWST_Catalogue.fits"
-download_wdir = "/net/vdesk/data2/slagter/"
-starbug_env_path= "/net/vdesk/data2/slagter/environment_path/SB_venv/bin/starbug2"
-
-
-
-# ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= =======
-# Paramters
-# ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= =======
-
-wcs_align = jhat.st_wcs_align()
-verbose = 2
-wcs_align.verbose = verbose
-new_line = "\n"
+if MPLSTYLE.exists():
+    plt.style.use(str(MPLSTYLE))
 
 # ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= =======
 # Data reduction pipeline for level 2 data, single dither or full mosaic
@@ -65,9 +35,8 @@ class Pipeline_level_2_data:
         self.files.find_calibrated_filenames()
         self.IMAGE_TYPES = ("bgsub", "cal", "1overf", "background")
 
-        self.catalogue_path = catalogue_jeroen_path
-        self.Catalogue = PTK.Read_Catalogue(catalogue_path=self.catalogue_path)
-
+        self.catalogue_path = CATALOGUE_JEROEN
+        self.Catalogue = PTK.Read_Catalogue(catalogue_path=str(self.catalogue_path))
         print("Initialized filepaths for : ", self.files.current_filters)
 
     # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -78,9 +47,7 @@ class Pipeline_level_2_data:
                                       N_CPUS = 2
                                       ):
         Number_of_frames = 1#(len(self.files.file_paths_1overf[filt]))
-        source_path = "/net/vdesk/data2/slagter/JWST_NIRCAM_#1227_level_3/F115W_merged_ap.fits"
-        source_path =  "/home/slagter/Astronomy_master/STRW-MSC/SF_in_NGC/Photometry/catalogue_jeroen/positions_F115W.fits"
-
+        source_path = POSITIONS_F115W
 
         for IMAGE_INDEX in tqdm.tqdm(
                    range(Number_of_frames), desc="(A) PSF photometry"
@@ -90,8 +57,8 @@ class Pipeline_level_2_data:
             bgdfile = self.files.file_paths_jhat_bgd[filt][IMAGE_INDEX]
 
             if Path(bgdfile).exists():
-                cmd = [starbug_env_path,
-                "-d",source_path,
+                cmd = [str(STARBUG2_BIN),
+                "-d",str(source_path),
                 "-p", self._determine_filename_sb2_param(filt, mode="long"), # for here mode doesnt matter as we have given fixed source list.
                 "-s", "DPOS_THRESH=0.1", 
                 #"-s", "FORCE_POS=1",
@@ -123,13 +90,25 @@ class Pipeline_level_2_data:
             "Association file": False,
             "Image3Pipeline": False,
         },
-        output_dir= download_wdir + "/JWST_NIRCAM_#1227_level_3",
+        output_dir=LEVEL3_DIR,
     ):  # standard level 3 output directory for all frames!
-
         print(f"----Initializing Pipeline for {filt}---------")
+
+
+        os.chdir("/home/slagter/Astronomy_master/STRW-MSC/SF_in_NGC")
+        os.environ["CRDS_PATH"] = os.path.expanduser("~/crds_cache")
+        os.environ["CRDS_CONTEXT"] = "jwst_1584.pmap"
+        os.environ["CRDS_SERVER_URL"] = "https://jwst-crds.stsci.edu"
+
+        import jwst
+        from jwst.pipeline import Image3Pipeline
+        from jwst.associations import asn_from_list
+        from jwst.associations.lib.rules_level3_base import DMS_Level3_Base
+
+       
         mosaic_title = f"mosaic_{filt}_final"
-        association_path = output_dir + "/" + mosaic_title + ".json"
-        mosaic_path = output_dir + "/" + mosaic_title + "_i2d.fits"
+        association_path = output_dir / f"{mosaic_title}.json"
+        mosaic_path      = output_dir / f"{mosaic_title}_i2d.fits"
         print(f"----Results stored in {mosaic_title}-----")
 
         Number_of_frames = (len(self.files.file_paths_1overf[filt]))
@@ -373,10 +352,10 @@ class Pipeline_level_2_data:
             self._determine_filename_sb2_param(filter=filter, mode="short")
         )
 
-        gaia_cat_path = (
-            str(Path(self.wdir).parent.parent) + "/ngc346_gaia_dr3_10arcmin_clean.txt"
-        )
-
+        import jhat
+        wcs_align = jhat.st_wcs_align()
+        wcs_align.verbose = 2
+        new_line = "\n"
         try:
             wcs_align.run_all(
                 self.files.file_paths_1overf[filter][IMAGE_INDEX],
@@ -386,7 +365,7 @@ class Pipeline_level_2_data:
                 overwrite=True,  # Ensure that if function is called we actually compute new stuff
                 d2d_max=0.5,
                 showplots=0,
-                refcatname=gaia_cat_path,  # Downloaded gaia catalog, 5 armin around coordiantes of NGC346
+                refcatname=str(GAIA_CATALOGUE),  # Downloaded gaia catalog, 5 armin around coordiantes of NGC346
                 refcat_racol="ra",
                 refcat_deccol="dec",
                 refcat_magcol="phot_g_mean_mag",
@@ -411,22 +390,9 @@ class Pipeline_level_2_data:
         """
         Collects the x and y position alongside the magnitude error of detected sources from a starbug2 aperture photometry result file.
         """
-        x_positions_sources = fits.open(filename_ap)[1].data[f"xcentroid"]
-        y_positions_sources = fits.open(filename_ap)[1].data[f"ycentroid"]
-        RA_position = fits.open(filename_ap)[1].data[f"RA"]
-        DEC_position = fits.open(filename_ap)[1].data[f"DEC"]
-        flag_sources = fits.open(filename_ap)[1].data[f"flag"]
-        magnitude_sources = fits.open(filename_ap)[1].data[filter]
-        magnitude_error_sources = fits.open(filename_ap)[1].data["e" + filter]
-        return (
-            x_positions_sources,
-            y_positions_sources,
-            RA_position,
-            DEC_position,
-            flag_sources,
-            magnitude_sources,
-            magnitude_error_sources,
-        )
+        with fits.open(filename_ap) as hdul:
+            d = hdul[1].data
+        return (d["xcentroid"], d["ycentroid"], d["RA"], d["DEC"], d["flag"], d[filter], d["e"+filter])
 
     def _collect_detections_mag_limited(self, filename_ap, filter, detection_sigma=2.0):
         """
@@ -471,65 +437,6 @@ class Pipeline_level_2_data:
         align_fits = fits.open(self.files.file_paths_1overf_jhat[filter][IMAGE_INDEX])
         return wcs.WCS(align_fits["SCI", 1], align_fits)
 
-    def cross_match_detections(self, sky1, sky2, det_tol=0.5 * u.arcsec):
-        """
-        Build a kd-tree from the detection coordinates of filter [A], and find all coordinates within 0.5'' of it in filter [B].
-        """
-        A = np.array([sky1.ra.to(u.deg).value, sky1.dec.to(u.deg).value]).T
-        B = np.array([sky2.ra.to(u.deg).value, sky2.dec.to(u.deg).value]).T
-        tree = KDTree(B)
-
-        matches = tree.query_ball_point(A, r=det_tol.to(u.deg).value)
-        a_idx = []
-        b_idx = []
-        for i, match in enumerate(matches):
-            for j in match:
-                a_idx.append(i)
-                b_idx.append(j)
-
-        a_idx = np.array(a_idx)
-        b_idx = np.array(b_idx)
-        print(f"Found {len(a_idx)} matching detections")
-        print(4)
-        return A, B, a_idx, b_idx
-
-    def _find_overlapping_indices(self, filters, det_tol):
-        """
-        Search for overlapping sources between filters. method:
-        1) set first filter as reference
-        2) find all detections that occur in filter B within det_tol radius of each detecion in A
-        3) select only detections that occur in both filters
-        """
-        ref = filters[0]
-        ref_idx = np.arange(len(self.world_coord_sources[ref][0]))
-        matched_mask = np.ones(len(ref_idx), dtype=bool)
-
-        pair_matches = {}  # other_filter -> (a_idx into ref, b_idx into other)
-        for other in filters[1:]:
-            _, _, a_idx, b_idx = self.cross_match_detections(
-                sky1=self.world_coord_sources[ref],
-                sky2=self.world_coord_sources[other],
-                det_tol=det_tol,
-            )
-            pair_matches[other] = (a_idx, b_idx)
-
-            has_match = np.zeros(len(ref_idx), dtype=bool)
-            if len(a_idx) > 0:
-                has_match[np.unique(a_idx)] = True
-            matched_mask &= has_match
-
-        overlap_ref_idx = ref_idx[matched_mask]
-        overlap_idx_per_filter = {ref: overlap_ref_idx}
-        for other in filters[1:]:
-            a_idx, b_idx = pair_matches[other]
-            if len(a_idx) > 0:
-                keep = np.isin(a_idx, overlap_ref_idx)
-                overlap_idx_per_filter[other] = np.unique(b_idx[keep])
-            else:
-                overlap_idx_per_filter[other] = np.array([], dtype=int)
-
-        return overlap_idx_per_filter
-
     # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     # (3) Aperture photometry / source detection with STARBUG2
     # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -555,16 +462,10 @@ class Pipeline_level_2_data:
         """
         Ease of use function to find SB2 param file based on filter
         """
-        if mode is not None:
-            return str(
-                "/home/slagter/Astronomy_master/STRW-MSC/SF_in_NGC/Photometry/parameter_files_starbug/starbug_"
-                + filter
-                + "_"
-                + mode
-                + ".param"
-            )
-        else:
-            return
+        if mode is None:
+            return None
+        return str(SB_PARAM_DIR / f"starbug_{filter}_{mode}.param")
+
 
     def _get_cmd_unknown_sources(self, starbug_path, IMAGE_INDEX, filter):
         return [
@@ -576,9 +477,7 @@ class Pipeline_level_2_data:
         ]
 
     def _make_pos_good_sources(self, filter):
-        return self.Catalogue.make_source_list(
-            filt_mask_on=(filter, 2.0), outfile="Photometry/test_pos.fits"
-        )
+        return self.Catalogue.make_source_list(filt_mask_on=(filter, 2.0), outfile=str(PHOT_DIR / "test_pos.fits"))
 
     def _get_cmd_known_sources(self, starbug_path, source_path, filter, IMAGE_INDEX):
 
@@ -609,13 +508,13 @@ class Pipeline_level_2_data:
             2) 'overwrite_always_run' is true
 
         """
-        cmd = self._get_cmd_unknown_sources(starbug_env_path, IMAGE_INDEX, filter)
+        cmd = self._get_cmd_unknown_sources(STARBUG2_BIN, IMAGE_INDEX, filter)
 
         if known_sources == True:
             # Switch to the cmd for known source list
             source_path       = self._make_pos_good_sources(filter)
             cmd_known_sources = self._get_cmd_known_sources(
-                starbug_env_path, source_path, filter, IMAGE_INDEX
+                STARBUG2_BIN, source_path, filter, IMAGE_INDEX
             )
             cmd = cmd_known_sources
 
@@ -658,7 +557,7 @@ class Pipeline_level_2_data:
 
         #Just let it detect with the param file (see git for jeroens catalogue thingy)
         cmd = [
-            starbug_env_path,
+            STARBUG2_BIN,
             "-p",  # Work with own parameters files based on filter and exposure time (see jeroen)
             self._determine_filename_sb2_param(filter, mode=mode),
             "-vDA", # v = verbose, D = detect with the parameter file!, A= aperture photometry
@@ -677,7 +576,8 @@ class Pipeline_level_2_data:
         return fits.open(filename)[1].data
 
     def plot_cal_steps_per_filter(self, IMAGE_INDEX, filter, save=False):
-        os.chdir(self.wdir)
+        out = PLOTS_DIR / "bgd_cal_steps"
+        out.mkdir(parents=True, exist_ok=True)
 
         fig = plt.figure(figsize=(30, 7))
         gs = gridspec.GridSpec(1, 4, figure=fig, wspace=0.0, hspace=0.0)
@@ -839,6 +739,14 @@ def sub1fimaging(cal2hdulist, sigma_bgmask, sigma_1fmask, splitamps, usesegmask)
     splitamps - fit each of the 4 amps separately when full-frame  (set this to True when the field is sparse)
     usesegmask - whether to use a segmentation image as the mask before fitting 1/f stripes (recommend set to True in most cases)
     """
+
+    from astropy.stats import SigmaClip
+    from astropy.convolution import convolve
+    from photutils import Background2D, MedianBackground
+    from photutils.segmentation import detect_sources, make_2dgaussian_kernel
+    from jwst.datamodels import dqflags
+    from copy import deepcopy
+
 
     # Check subarray type and extract non-reference pixels
     if cal2hdulist["PRIMARY"].header["SUBARRAY"] == "FULL":
