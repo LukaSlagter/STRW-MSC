@@ -22,9 +22,9 @@ def main() -> None:
     mode = args.mode
 
     mosaic_path = (
-        f"/net/vdesk/data2/slagter/JWST_NIRCAM_#1227_level_3/"
-        f"mosaic_{filter_}_{mode}_exposure.fits"
+        f"/net/vdesk/data2/slagter/JWST_NIRCAM_#1227_level_3/mosaic_{filter_}_{mode}_exposure.fits"
     )
+    print(f'Will run Starbug2 on {mosaic_path}')
 
     PHOTOMETRIC_pipeline = PPL.Pipeline_level_2_data(
         working_directory="/net/vdesk/data2/slagter/JWST_NIRCAM_#1227_level_2/mastDownload/JWST"

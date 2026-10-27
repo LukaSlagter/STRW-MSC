@@ -2,3 +2,54 @@ nohup: ignoring input
 WARNING: AstropyDeprecationWarning: Module 'tweakwcs.tpwcs' has been deprecated since version 0.8.0. Please use corrector classes from the 'tweakwcs.correctors' module. [tweakwcs.tpwcs]
 **WARNING**: LOCAL JWST PRD VERSION PRDOPSSOC-073 DOESN'T MATCH THE CURRENT ONLINE VERSION PRDOPSSOC-075
 Please consider updating pysiaf, e.g. pip install --upgrade pysiaf or conda update pysiaf
+The current archive release 3.15 contains two breaking changes. Please see https://www.cosmos.esa.int/web/gaia/news#GACSrelease315 for details. In case of questions or feedback, please consult the Gaia helpdesk at https://www.cosmos.esa.int/web/gaia/gaia-helpdesk.
+Will run Starbug2 on /net/vdesk/data2/slagter/JWST_NIRCAM_#1227_level_3/mosaic_F115W_short_exposure.fits
+Initialized filepaths for :  ['F187N', 'F335M', 'F115W', 'F277W', 'F200W', 'F444W', 'F182M', 'F430M', 'F090W', 'F356W', 'F150W', 'F480M', 'F212N']
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/net/vdesk/data2/slagter/JWST_NIRCAM_#1227_level_3/mosaic_F115W_short_exposure.fits"
+loaded: "/net/vdesk/data2/slagter/JWST_NIRCAM_#1227_level_3/mosaic_F115W_short_exposure.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F115W
+-> detector module: MULTIPLE
+-> pipeline stage: 3
+Checking internal systems..
+Detecting Sources
+-> [PLAIN] pass: 4856100 sources
+-> [BGD2D] pass: 5809380 sources
+-> [CONVL] pass: 6000558 sources
+-> measuring source geometry
+-> cleaning 3280382 unlikley point sources
+Total: 2720176 sources
+
+Running Aperture Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.292011e-08
+-> apcorr file: /home/slagter/.local/share/starbug/apcorr_nircam.fits
+-> estimating aperture correction: 2.19
+-> apertures: 1.5 (3 - 4.5)
+-> calculating sky values
+-> removing 60655 sources outside SMOOTH range
+--> /net/vdesk/data2/slagter/JWST_NIRCAM_#1227_level_3/mosaic_F115W_short_exposure-ap.fits
+
+Running Aperture Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.292011e-08
+-> apcorr file: /home/slagter/.local/share/starbug/apcorr_nircam.fits
+-> estimating aperture correction: 2.19
+-> apertures: 1.5 (3 - 4.5)
+-> calculating sky values
+--> /net/vdesk/data2/slagter/JWST_NIRCAM_#1227_level_3/mosaic_F115W_short_exposure-ap.fits
+
+---------------------------
+
+--- Running stargbug finalized ---

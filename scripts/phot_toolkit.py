@@ -4,49 +4,16 @@
 # ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= =======
 import os, sys, subprocess
 import tqdm
-
-from pathlib import Path
 import numpy as np
-
-import matplotlib.pyplot as plt, matplotlib.gridspec as gridspec
-from matplotlib.collections import EllipseCollection
-from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes, mark_inset
-
-plt.style.use("/home/slagter/Astronomy_master/STRW-MSC/stylish.mplstyle")
-
 
 import astropy.units as u, astropy.constants as const
 from astropy.table import Table
-
 from astropy.io import fits
-from astropy import wcs
-from astropy.wcs.utils import proj_plane_pixel_scales, skycoord_to_pixel
 from astropy.coordinates import SkyCoord
-from astropy.nddata import extract_array
-from astropy.visualization import simple_norm, LinearStretch
-import jhat
-
-os.chdir("/home/slagter/Astronomy_master/STRW-MSC/SF_in_NGC")
-os.environ["CRDS_PATH"] = os.path.expanduser("~/crds_cache")
-os.environ["CRDS_CONTEXT"] = "jwst_1584.pmap"
-os.environ["CRDS_SERVER_URL"] = "https://jwst-crds.stsci.edu"
-
-import jwst
-from jwst.pipeline import Image3Pipeline
-from jwst.associations import asn_from_list
-from jwst.associations.lib.rules_level3_base import DMS_Level3_Base
-
-# is now in the .background / .segmentation thingy...
-from photutils.background import Background2D, MedianBackground
-from photutils.segmentation import detect_sources, make_2dgaussian_kernel
-from jwst.datamodels import dqflags
-
 
 # ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= =======
 # Reading Jeroens catalogue + masking region
 # ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= =======
-
-
 class Read_Catalogue:
     def __init__(
         self,

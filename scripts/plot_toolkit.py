@@ -1,10 +1,7 @@
 import numpy as np
 
 import matplotlib.pyplot as plt, matplotlib.gridspec as gridspec
-from matplotlib.collections import EllipseCollection
 from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes, mark_inset
-from matplotlib.patches import Circle
-from matplotlib.colors import LogNorm
 
 plt.style.use("/home/slagter/Astronomy_master/STRW-MSC/stylish.mplstyle")
 
@@ -13,18 +10,13 @@ import astropy.units as u
 from astropy.visualization import ZScaleInterval
 from astropy.wcs import WCS
 from reproject import reproject_interp
-import matplotlib.patches as mpatches
-from astropy.stats import SigmaClip
-from astropy.convolution import Gaussian2DKernel, convolve
-
-import phot_toolkit as PTK
-import photometric_pipeline as PPL
+import phot_toolkit as PTK 
 from astropy.coordinates import SkyCoord
+import matplotlib.colors as mcolors
+import matplotlib.cm as cm
 from matplotlib.colors import to_rgb
 from astropy.visualization import (
     ZScaleInterval,
-    AsinhStretch,
-    ImageNormalize,
     make_lupton_rgb,
 )
 from astropy.wcs.utils import proj_plane_pixel_scales
@@ -210,21 +202,32 @@ def load_image_color(filt, target, shape_out):
         img, _ = reproject_interp((data, w), target, shape_out=shape_out)
     return img
 
+def load_image_wht(filt, target, shape_out):
+    """
+    Reproject single mosaic into grid
+    """
+    level3_data_path = '/net/vdesk/data2/slagter/JWST_NIRCAM_#1227_level_3/'
+    with fits.open(level3_data_path + f'mosaic_{filt}_final_i2d.fits', memmap=True) as hdu:
+        data = hdu['WHT'].data
+        w    = WCS(hdu['SCI'].header, hdu)
+        img, _ = reproject_interp((data, w), target, shape_out=shape_out)
+    return img
 
-def plot_mosaic(filter      = 'F115W',
+def plot_mosaic_wht(filter      = 'F115W',
                 center      = SkyCoord(ra=14.95176547*u.deg, dec=-72.21625529*u.deg,frame='icrs'), #the one from F187N
                 dra         = 1 * u.arcmin, 
                 ddec        = 0 * u.arcmin,
                 rot         = 0 * u.deg,                    
                 width       = 15 * u.arcmin,                
                 height      = 15 * u.arcmin,
-                pix_scale   = 0.5 * u.arcsec,             
+                pix_scale   = 0.5 * u.arcsec,      
+                test_split  = None    
                 ):
 
     # center = find_center(*Image.shape, wcs= wcs_mosaic)
     # print(center)
     target, shape_out = make_target_wcs(center, dra, ddec, rot, width, height, pix_scale)
-    Image             = load_image_color(filter, target, shape_out)
+    Image             = load_image_wht(filter, target, shape_out)
 
     fig = plt.figure(figsize=(7,7))
     gs = gridspec.GridSpec(1, 1, figure=fig)  # once, before the loop
@@ -233,12 +236,31 @@ def plot_mosaic(filter      = 'F115W',
     interval            = ZScaleInterval()
     vmin, vmax          = interval.get_limits(Image)
 
-    ax.imshow(Image, cmap='bone', vmin=vmin, vmax=vmax, origin='lower')
+    norm        = mcolors.Normalize(vmin=vmin, vmax=vmax)
+    cmap        = plt.get_cmap("bone")  
+
+
+    if test_split is not None:
+        cmap = plt.colormaps['bone'].copy() 
+        cmap.set_bad('red')                   # masked pixels will be drawn red
+
+        masked = np.ma.masked_where((Image > vmin) & (Image < test_split), Image)
+        im = ax.imshow(masked, cmap=cmap, vmin=vmin, vmax=vmax, origin='lower')
+    else:
+        im = ax.imshow(Image, cmap='bone', vmin=vmin, vmax=vmax, origin='lower')
+
+
+    cbar = fig.colorbar(
+        cm.ScalarMappable(norm=norm, cmap=cmap), 
+        ax          =ax, 
+        pad         = 0.01,
+        orientation ='vertical' ,
+        label       = r'WHT', 
+    )
     ax.set_facecolor(plt.colormaps['bone'](0))
     ax.coords['ra'].set_axislabel('RA')
     ax.coords['dec'].set_axislabel('Dec')
     ax.grid(color='w', alpha=0.3)
-    plt.savefig(f"Plots/Mosaic_{filter}_final.pdf", bbox_inches='tight')
     return
 
 

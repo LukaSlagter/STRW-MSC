@@ -7,44 +7,33 @@ import numpy as np
 import phot_toolkit as PTK
 
 import matplotlib.pyplot as plt, matplotlib.gridspec as gridspec
-from matplotlib.collections import EllipseCollection
 from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes, mark_inset
-from matplotlib.patches import Circle
-from matplotlib.colors import LogNorm
 
 plt.style.use("/home/slagter/Astronomy_master/STRW-MSC/stylish.mplstyle")
 
-
 import astropy.units as u, astropy.constants as const
-from astropy.table import Table
 from astropy.visualization import ZScaleInterval
 from astropy.io import fits
 from astropy import wcs
-from astropy.wcs.utils import proj_plane_pixel_scales, skycoord_to_pixel
+
 from astropy.stats import SigmaClip
-from astropy.convolution import Gaussian2DKernel, convolve
-from astropy.coordinates import SkyCoord
-from astropy.nddata import extract_array
-from astropy.visualization import simple_norm, LinearStretch
-
 import jhat
-import scipy.signal
 
-os.chdir("/home/slagter/Astronomy_master/STRW-MSC/SF_in_NGC")
-os.environ["CRDS_PATH"] = os.path.expanduser("~/crds_cache")
-os.environ["CRDS_CONTEXT"] = "jwst_1584.pmap"
-os.environ["CRDS_SERVER_URL"] = "https://jwst-crds.stsci.edu"
+# os.chdir("/home/slagter/Astronomy_master/STRW-MSC/SF_in_NGC")
+# os.environ["CRDS_PATH"] = os.path.expanduser("~/crds_cache")
+# os.environ["CRDS_CONTEXT"] = "jwst_1584.pmap"
+# os.environ["CRDS_SERVER_URL"] = "https://jwst-crds.stsci.edu"
 
-import jwst
-from jwst.pipeline import Image3Pipeline
-from jwst.associations import asn_from_list
-from jwst.associations.lib.rules_level3_base import DMS_Level3_Base
+# import jwst
+# from jwst.pipeline import Image3Pipeline
+# from jwst.associations import asn_from_list
+# from jwst.associations.lib.rules_level3_base import DMS_Level3_Base
 
 # is now in the .background / .segmentation thingy...
-from photutils.background import Background2D, MedianBackground
-from photutils.segmentation import detect_sources, make_2dgaussian_kernel
-from jwst.datamodels import dqflags
-from copy import deepcopy
+# from photutils.background import Background2D, MedianBackground
+# from photutils.segmentation import detect_sources, make_2dgaussian_kernel
+# from jwst.datamodels import dqflags
+# from copy import deepcopy
 
 
 
@@ -58,10 +47,10 @@ wcs_align = jhat.st_wcs_align()
 verbose = 2
 wcs_align.verbose = verbose
 new_line = "\n"
+
 # ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= =======
 # Data reduction pipeline for level 2 data, single dither or full mosaic
 # ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= =======
-
 
 class Pipeline_level_2_data:
     """
@@ -82,7 +71,48 @@ class Pipeline_level_2_data:
     # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     # (1) Full pipeline
     # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-    def run_pipeline_all(
+    def run_psf_on_individual_dithers(self,
+                                      filt,
+                                      N_CPUS = 2
+                                      ):
+        Number_of_frames = 1#(len(self.files.file_paths_1overf[filt]))
+        source_path = "/net/vdesk/data2/slagter/JWST_NIRCAM_#1227_level_3/F115W_merged_ap.fits"
+        source_path =  "/home/slagter/Astronomy_master/STRW-MSC/SF_in_NGC/Photometry/catalogue_jeroen/positions_F115W.fits"
+        starbug_path = "/net/vdesk/data2/slagter/environment_path/SB_venv/bin/starbug2"
+
+        for IMAGE_INDEX in tqdm.tqdm(
+                   range(Number_of_frames), desc="(A) PSF photometry"
+               ): 
+
+            cal_file = self.files.file_paths_1overf_jhat[filt][IMAGE_INDEX]
+            bgdfile = self.files.file_paths_jhat_bgd[filt][IMAGE_INDEX]
+
+            if Path(bgdfile).exists():
+                cmd = [starbug_path,
+                "-d",source_path,
+                "-p", self._determine_filename_sb2_param(filt, mode="long"), # for here mode doesnt matter as we have given fixed source list.
+                "-s", "DPOS_THRESH=0.1", 
+                #"-s", "FORCE_POS=1",
+                "-n", str(N_CPUS),
+                '-b', bgdfile,
+                "-vP", cal_file,
+                ]
+            else:
+                cmd = [starbug_path,
+                                "-d",source_path,
+                                "-p", self._determine_filename_sb2_param(filt, mode="long"), # for here mode doesnt matter as we have given fixed source list.
+                                "-s", "DPOS_THRESH=0.1", 
+                                "-n", str(N_CPUS),
+                                "-vBP", cal_file,
+                                ]
+
+
+            self._run_starbug2(cmd, toggle_sb_output_txt=True) # set to false as so many to run!
+
+        return
+
+        
+    def calibrate_all_individual_dithers(
         self,
         filt="",
         overwrite_dic={
@@ -413,6 +443,7 @@ class Pipeline_level_2_data:
         detection_mask = (magnitude_error_sources <= detection_sigma) & (
             flag_sources == 0
         )
+        print(f'Fractional <2.0 Emag' ,np.sum(detection_mask)/len(magnitude_error_sources))
         return (
             (x_positions_sources[detection_mask], y_positions_sources[detection_mask]),
             (RA_position[detection_mask], DEC_position[detection_mask]),
@@ -515,6 +546,7 @@ class Pipeline_level_2_data:
             print(result.stdout)  # prints the starbug2 terminal output :D
             print("---------------------------")
             print()
+
         return
 
     def _determine_filename_sb2_param(self, filter, mode="short"):
@@ -613,7 +645,7 @@ class Pipeline_level_2_data:
         self,
         mosaic_path,
         filter,
-        mode="short",
+        mode,
         toggle_sb_output_txt=True,
     ):
         """
@@ -625,16 +657,12 @@ class Pipeline_level_2_data:
         """
         starbug_path = "/net/vdesk/data2/slagter/environment_path/SB_venv/bin/starbug2"
 
-        #FIXINOIFHNSIFHIPWUENH!!!!!!
-        source_path = "/home/slagter/Astronomy_master/STRW-MSC/SF_in_NGC/Photometry/catalogue_jeroen/positions_F115W.fits"
-
+        #Just let it detect with the param file (see git for jeroens catalogue thingy)
         cmd = [
             starbug_path,
-             "-d",
-            source_path,
             "-p",  # Work with own parameters files based on filter and exposure time (see jeroen)
             self._determine_filename_sb2_param(filter, mode=mode),
-            "-A",
+            "-vDA", # v = verbose, D = detect with the parameter file!, A= aperture photometry
             mosaic_path,
         ]
 

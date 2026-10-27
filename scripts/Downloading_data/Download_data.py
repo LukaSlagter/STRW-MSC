@@ -63,7 +63,7 @@ filtered_products = Observations.filter_products(
     products,
     productSubGroupDescription="CAL",  # CAL --> Level 2 data
     extension="fits",
-    filters=to_be_done_filters,
+    filters=All_filters,
 )
 
 print(f"Found! {len(filtered_products)} Level 2 NIRCam files for #{program_id}.")
