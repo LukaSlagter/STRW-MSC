@@ -9,6 +9,8 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 PHOT_DIR      = PROJECT_ROOT / "Photometry"
 CAT_DIR       = PHOT_DIR / "catalogue_jeroen"
 SB_PARAM_DIR  = PHOT_DIR / "parameter_files_starbug"
+BESSEL_MODELS =  PROJECT_ROOT / "Continuum_emission_models/Synphot/Bessell_models"
+
 PLOTS_DIR     = PROJECT_ROOT / "Plots"
 
 CATALOGUE_JEROEN = CAT_DIR / "NGC346_NIRCam_and_MIRI_Public_JWST_Catalogue.fits"
@@ -21,3 +23,4 @@ LEVEL2_DIR   = DATA_ROOT / "JWST_NIRCAM_#1227_level_2"
 LEVEL3_DIR   = DATA_ROOT / "JWST_NIRCAM_#1227_level_3"
 STARBUG2_BIN = Path(os.environ.get("STARBUG2_BIN",
                     DATA_ROOT / "environment_path/SB_venv/bin/starbug2"))
+
