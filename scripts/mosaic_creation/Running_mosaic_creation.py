@@ -1,17 +1,25 @@
+import sys
+from pathlib import Path
 
-import os
+scripts_path = str(Path.cwd().parents[1]) + "/scripts/"
+if scripts_path not in sys.path:
+    sys.path.insert(0, scripts_path)
 
-os.chdir("/home/slagter/Astronomy_master/STRW-MSC/SF_in_NGC")
-import SF_in_NGC.scripts.photometric_pipeline as PPL
 
-# to_be_done_filters  = ['F356W', 'F150W', 'F212N',          '', '', 'F444W;F405N', 'F430M', 'F182M', 'F444W;F470N',          'F480M', 'F090W', '', '']
+from Config import (
+    LEVEL2_DIR,
 
+)
+
+import photometric_pipeline as PPL
+
+
+working_directory = f"{LEVEL2_DIR}/mastDownload/JWST"
+PHOTOMETRIC_pipeline = PPL.Pipeline_level_2_data(working_directory=working_directory)
 
 def main() -> None:
-    PHOTOMETRIC_pipeline = PPL.Pipeline_level_2_data(
-        working_directory="/net/vdesk/data2/slagter/JWST_NIRCAM_#1227_level_2/mastDownload/JWST"
-    )
-    PHOTOMETRIC_pipeline.run_pipeline_all(
+
+    PHOTOMETRIC_pipeline.calibrate_all_individual_dithers(
         filt="F115W",
         overwrite_dic={
             "1/f": True,

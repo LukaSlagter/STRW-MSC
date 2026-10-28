@@ -1,9 +1,11 @@
 from pathlib import Path
 import os
 
-PROJECT_ROOT = Path(os.environ.get("MSC_project", Path(__file__).resolve().parents[1]))
-DATA_ROOT = Path(os.environ.get("SF_IN_NGC_DATA", "/net/vdesk/data2/slagter"))
+SCRATCH = Path("/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC")
+NET = Path("/net/vdesk/data2/slagter")
 
+DATA_ROOT = SCRATCH if SCRATCH.exists() else NET
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 PHOT_DIR      = PROJECT_ROOT / "Photometry"
 CAT_DIR       = PHOT_DIR / "catalogue_jeroen"
 SB_PARAM_DIR  = PHOT_DIR / "parameter_files_starbug"
