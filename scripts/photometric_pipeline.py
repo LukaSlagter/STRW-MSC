@@ -421,6 +421,7 @@ class Pipeline_level_2_data:
         filter,
         mode,
         toggle_sb_output_txt=True,
+        N_CPUS=1,
     ):
         """
         Run aperture photomety starbug2 using subprocceses.
@@ -437,6 +438,7 @@ class Pipeline_level_2_data:
             self._determine_filename_sb2_param(filter, mode=mode),
             "-vDA",  # v = verbose, D = detect with the parameter file!, A= aperture photometry
             mosaic_path,
+             "-n", str(N_CPUS),
         ]
 
         self._run_starbug2(cmd, toggle_sb_output_txt)
@@ -460,6 +462,46 @@ class Pipeline_level_2_data:
             print()
 
         return
+    # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    # PSF photometrywith STARBUG2
+    # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    def run_psf_on_individual_dithers(self,
+                                      filt,
+                                      N_CPUS = 2
+                                      ):
+        Number_of_frames = len(self.files.file_paths_1overf_jhat[filt])
+        source_path = POSITIONS_F115W
+
+        for IMAGE_INDEX in tqdm.tqdm(
+                   range(Number_of_frames), desc="(A) PSF photometry"
+               ): 
+
+            cal_file = self.files.file_paths_1overf_jhat[filt][IMAGE_INDEX]
+            bgdfile = self.files.file_paths_jhat_bgd[filt][IMAGE_INDEX]
+
+            if Path(bgdfile).exists():
+                cmd = [str(STARBUG2_BIN),
+                "-d",str(source_path),
+                "-p", self._determine_filename_sb2_param(filt, mode="long"), # for here mode doesnt matter as we have given fixed source list.
+                "-s", "DPOS_THRESH=0.1", 
+                #"-s", "FORCE_POS=1",
+                "-n", str(N_CPUS),
+                '-b', bgdfile,
+                "-vP", cal_file,
+                ]
+            else:
+                cmd = [STARBUG2_BIN,
+                                "-d",source_path,
+                                "-p", self._determine_filename_sb2_param(filt, mode="long"), # for here mode doesnt matter as we have given fixed source list.
+                                "-s", "DPOS_THRESH=0.1", 
+                                "-n", str(N_CPUS),
+                                "-vBP", cal_file,
+                                ]
+
+
+            self._run_starbug2(cmd, toggle_sb_output_txt=True) # set to false as so many to run!
+        return
+
 
     # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     # Management functions

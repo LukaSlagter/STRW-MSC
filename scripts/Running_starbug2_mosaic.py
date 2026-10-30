@@ -2,10 +2,7 @@ import argparse
 import os
 from pathlib import Path
 
-os.chdir("/home/slagter/Astronomy_master/STRW-MSC/SF_in_NGC")
-
 import photometric_pipeline as PPL
-
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -42,6 +39,7 @@ def main() -> None:
             filter=filter_,
             mode=mode,
             toggle_sb_output_txt=True,
+            N_CPUS=2,
         )
     else:
         print(f"Path doesn't exist: {mosaic_path}")

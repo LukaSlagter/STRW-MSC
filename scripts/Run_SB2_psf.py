@@ -2,8 +2,6 @@ import argparse
 import os
 from pathlib import Path
 
-os.chdir("/home/slagter/Astronomy_master/STRW-MSC/SF_in_NGC")
-
 import photometric_pipeline as PPL
 
 
