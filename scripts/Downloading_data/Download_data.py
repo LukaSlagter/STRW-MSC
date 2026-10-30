@@ -2,6 +2,7 @@ import os
 from astroquery.mast import Observations
 import sys
 import argparse
+
 telescope = "JWST"
 instrument_name = "NIRCAM*"
 program_id = "1227"
@@ -13,6 +14,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--output_folder", required=True, help="output folder...")
     return parser.parse_args()
+
 
 args = parse_args()
 

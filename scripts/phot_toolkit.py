@@ -11,6 +11,7 @@ from astropy.table import Table
 from astropy.io import fits
 from astropy.coordinates import SkyCoord
 
+
 # ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= =======
 # Reading Jeroens catalogue + masking region
 # ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= =======
@@ -61,7 +62,7 @@ class Read_Catalogue:
                 self.mask_sources_on_filter(
                     filt_mask_on[0], detection_limit=filt_mask_on[1]
                 )
-                new = tab[["Catalogue_Number", "RA", "DEC"]][self.cat_filter_mask] #
+                new = tab[["Catalogue_Number", "RA", "DEC"]][self.cat_filter_mask]  #
             else:
                 return print("HELP")
 
@@ -155,36 +156,59 @@ def in_wcs_mask(ra, dec, wcs, shape):
     return mask
 
 
-
 level3_data_path = "/net/vdesk/data2/slagter/JWST_NIRCAM_#1227_level_3/"
 
-def Split_Mosaic_on_WHT(mosaic_path = level3_data_path + 'mosaic_F115W_final_i2d.fits',
-                        wht_threshold = 200.0):
-    
-    hdu = fits.open(mosaic_path)  
-        
-    # Build masks & Apply
-    wht_data = hdu['WHT'].data
-    long_exposure_mask      = wht_data > wht_threshold
-    short_exposure_mask     = ~long_exposure_mask  
-    long_exposure_data      = []
-    short_exposure_data     = []
 
-    for fit_frame in ['SCI', 'ERR',  'WHT', 'VAR_POISSON','VAR_RNOISE', 'VAR_FLAT']: #con
-        data    = hdu[fit_frame].data
-        header  = hdu[fit_frame].header
-        long_exposure_data.append( fits.ImageHDU(data  = np.where(long_exposure_mask, data, np.nan).astype(data.dtype),
-                 header=header, name=fit_frame))
-        
-        short_exposure_data.append( fits.ImageHDU(data = np.where(short_exposure_mask, data, np.nan).astype(data.dtype),
-                 header=header, name=fit_frame))
-        
-    hdu_out = fits.HDUList([fits.PrimaryHDU(header  = hdu[0].header)] + long_exposure_data)
-    hdu_out.writeto( level3_data_path + 'mosaic_F115W_long_exposure.fits', overwrite=True)
-    
-    hdu_out = fits.HDUList([fits.PrimaryHDU(header  = hdu[0].header)] + short_exposure_data)
-    hdu_out.writeto( level3_data_path + 'mosaic_F115W_short_exposure.fits', overwrite=True)
+def Split_Mosaic_on_WHT(
+    mosaic_path=level3_data_path + "mosaic_F115W_final_i2d.fits", wht_threshold=200.0
+):
+
+    hdu = fits.open(mosaic_path)
+
+    # Build masks & Apply
+    wht_data = hdu["WHT"].data
+    long_exposure_mask = wht_data > wht_threshold
+    short_exposure_mask = ~long_exposure_mask
+    long_exposure_data = []
+    short_exposure_data = []
+
+    for fit_frame in [
+        "SCI",
+        "ERR",
+        "WHT",
+        "VAR_POISSON",
+        "VAR_RNOISE",
+        "VAR_FLAT",
+    ]:  # con
+        data = hdu[fit_frame].data
+        header = hdu[fit_frame].header
+        long_exposure_data.append(
+            fits.ImageHDU(
+                data=np.where(long_exposure_mask, data, np.nan).astype(data.dtype),
+                header=header,
+                name=fit_frame,
+            )
+        )
+
+        short_exposure_data.append(
+            fits.ImageHDU(
+                data=np.where(short_exposure_mask, data, np.nan).astype(data.dtype),
+                header=header,
+                name=fit_frame,
+            )
+        )
+
+    hdu_out = fits.HDUList([fits.PrimaryHDU(header=hdu[0].header)] + long_exposure_data)
+    hdu_out.writeto(
+        level3_data_path + "mosaic_F115W_long_exposure.fits", overwrite=True
+    )
+
+    hdu_out = fits.HDUList(
+        [fits.PrimaryHDU(header=hdu[0].header)] + short_exposure_data
+    )
+    hdu_out.writeto(
+        level3_data_path + "mosaic_F115W_short_exposure.fits", overwrite=True
+    )
 
     hdu.close()
     return
-

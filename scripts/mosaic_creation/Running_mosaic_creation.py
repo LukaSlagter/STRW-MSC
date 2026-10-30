@@ -8,14 +8,13 @@ if scripts_path not in sys.path:
 
 from Config import (
     LEVEL2_DIR,
-
 )
 
 import photometric_pipeline as PPL
 
-
 working_directory = f"{LEVEL2_DIR}/mastDownload/JWST"
 PHOTOMETRIC_pipeline = PPL.Pipeline_level_2_data(working_directory=working_directory)
+
 
 def main() -> None:
 
@@ -32,5 +31,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-

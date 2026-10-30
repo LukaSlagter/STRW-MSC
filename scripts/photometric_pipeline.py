@@ -13,8 +13,15 @@ from astropy import wcs
 
 
 from Config import (
-    CATALOGUE_JEROEN, POSITIONS_F115W, GAIA_CATALOGUE, MPLSTYLE,
-    SB_PARAM_DIR, PHOT_DIR, PLOTS_DIR, LEVEL3_DIR, STARBUG2_BIN,
+    CATALOGUE_JEROEN,
+    POSITIONS_F115W,
+    GAIA_CATALOGUE,
+    MPLSTYLE,
+    SB_PARAM_DIR,
+    PHOT_DIR,
+    PLOTS_DIR,
+    LEVEL3_DIR,
+    STARBUG2_BIN,
 )
 
 if MPLSTYLE.exists():
@@ -23,6 +30,7 @@ if MPLSTYLE.exists():
 # ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= =======
 # Data reduction pipeline for level 2 data, single dither or full mosaic
 # ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= =======
+
 
 class Pipeline_level_2_data:
     """
@@ -39,9 +47,9 @@ class Pipeline_level_2_data:
         self.Catalogue = PTK.Read_Catalogue(catalogue_path=str(self.catalogue_path))
         print("Initialized filepaths for : ", self.files.current_filters)
 
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-# Aperture photometry
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    # Aperture photometry
+    # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     def Run_AP_on_individual_lvl2_dither(
         self,
         IMAGE_INDEX=28,
@@ -73,8 +81,7 @@ class Pipeline_level_2_data:
             else:
                 print(f"    (SKIPPED) Calibrating 1/f            -- Using previous run")
             if (
-                Path(self.files.file_paths_1overf[filt][IMAGE_INDEX]).exists()
-                == False
+                Path(self.files.file_paths_1overf[filt][IMAGE_INDEX]).exists() == False
                 or overwrite_dic["Jhat calibration"] == True
             ):
                 print(f"    (2) Aligning with gaia catalog")
@@ -111,13 +118,15 @@ class Pipeline_level_2_data:
                 detection_sigma=detection_sigma,
             )
 
-            #always plot, just the save!
+            # always plot, just the save!
             self.plot_cal_steps_per_filter(
                 IMAGE_INDEX=IMAGE_INDEX, filter=filt, save=save_cal_step_plot
             )
 
         print("----Pipeline Versions-----")
-        self.find_calibration_versions(self.files.file_paths_1overf_jhat[filt][IMAGE_INDEX])
+        self.find_calibration_versions(
+            self.files.file_paths_1overf_jhat[filt][IMAGE_INDEX]
+        )
         print("--------Completed--------")
         return
 
@@ -182,13 +191,12 @@ class Pipeline_level_2_data:
         from jwst.associations import asn_from_list
         from jwst.associations.lib.rules_level3_base import DMS_Level3_Base
 
-       
         mosaic_title = f"mosaic_{filt}_final"
         association_path = output_dir / f"{mosaic_title}.json"
-        mosaic_path      = output_dir / f"{mosaic_title}_i2d.fits"
+        mosaic_path = output_dir / f"{mosaic_title}_i2d.fits"
         print(f"----Results stored in {mosaic_title}-----")
 
-        Number_of_frames = (len(self.files.file_paths_1overf[filt]))
+        Number_of_frames = len(self.files.file_paths_1overf[filt])
         print(f"----We have a total of {Number_of_frames}# to run----------")
 
         # Running 1/f
@@ -206,8 +214,7 @@ class Pipeline_level_2_data:
             range(Number_of_frames), desc="(2) Aligning with gaia catalog"
         ):
             if (
-                Path(self.files.file_paths_1overf[filt][IMAGE_INDEX]).exists()
-                == False
+                Path(self.files.file_paths_1overf[filt][IMAGE_INDEX]).exists() == False
                 or overwrite_dic["1/f"] == True
             ):
                 self.assign_WCS_from_gaia_dr3(IMAGE_INDEX=IMAGE_INDEX, filter=filt)
@@ -249,10 +256,9 @@ class Pipeline_level_2_data:
         print("----Completed----")
         return
 
-
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-# 1/f calibration
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    # 1/f calibration
+    # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
     def calibrate_one_over_f(self, IMAGE_INDEX, filt):
         """
@@ -285,9 +291,9 @@ class Pipeline_level_2_data:
             )
         return
 
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-# Jhat alignment & WCS transformations
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    # Jhat alignment & WCS transformations
+    # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
     def assign_WCS_from_gaia_dr3(self, IMAGE_INDEX, filter="F187N"):
         """
@@ -295,9 +301,7 @@ class Pipeline_level_2_data:
 
         Uses the same sharpness/roundness parameters as used later by starbug, different per filter!!
         """
-        out_put_dir = str(
-            Path(self.files.file_paths[filter][IMAGE_INDEX]).parent
-        )  
+        out_put_dir = str(Path(self.files.file_paths[filter][IMAGE_INDEX]).parent)
         prev_cwd = os.getcwd()
         os.chdir(out_put_dir)
         config = PTK.load_starbug_params(
@@ -305,6 +309,7 @@ class Pipeline_level_2_data:
         )
 
         import jhat
+
         wcs_align = jhat.st_wcs_align()
         wcs_align.verbose = 2
         new_line = "\n"
@@ -317,7 +322,9 @@ class Pipeline_level_2_data:
                 overwrite=True,  # Ensure that if function is called we actually compute new stuff
                 d2d_max=0.5,
                 showplots=0,
-                refcatname=str(GAIA_CATALOGUE),  # Downloaded gaia catalog, 5 armin around coordiantes of NGC346
+                refcatname=str(
+                    GAIA_CATALOGUE
+                ),  # Downloaded gaia catalog, 5 armin around coordiantes of NGC346
                 refcat_racol="ra",
                 refcat_deccol="dec",
                 refcat_magcol="phot_g_mean_mag",
@@ -337,6 +344,7 @@ class Pipeline_level_2_data:
             os.chdir(prev_cwd)
 
         return
+
     def _transform_detection_pixel_to_world(self, wcs, pixel_coords):
         """
         Transform PIXEL to WORLD coordinates with provided wcs. pixel_coords must be (x_pos, y_pos)
@@ -348,7 +356,7 @@ class Pipeline_level_2_data:
         Transform WORLD to PIXEL coordinates with provided wcs. world_coords must be (ra, dec)
         """
         return wcs.world_to_pixel_values(*world_coords)
-    
+
     def _collect_wcs_of_SB2_detections(self, IMAGE_INDEX=0, filter="F187N"):
         """
         Find the wcs system from the gaia matchinging
@@ -356,9 +364,9 @@ class Pipeline_level_2_data:
         align_fits = fits.open(self.files.file_paths_1overf_jhat[filter][IMAGE_INDEX])
         return wcs.WCS(align_fits["SCI", 1], align_fits)
 
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-# Aperture photometry / source detection with STARBUG2
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    # Aperture photometry / source detection with STARBUG2
+    # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
     def starbug2_aperture_photometry_on_dither(
         self,
@@ -381,7 +389,7 @@ class Pipeline_level_2_data:
 
         if known_sources == True:
             # Switch to the cmd for known source list
-            source_path       = self._make_pos_good_sources(filter)
+            source_path = self._make_pos_good_sources(filter)
             cmd_known_sources = self._get_cmd_known_sources(
                 STARBUG2_BIN, source_path, filter, IMAGE_INDEX
             )
@@ -424,18 +432,17 @@ class Pipeline_level_2_data:
 
         """
 
-        #Just let it detect with the param file (see git for jeroens catalogue thingy)
+        # Just let it detect with the param file (see git for jeroens catalogue thingy)
         cmd = [
             STARBUG2_BIN,
             "-p",  # Work with own parameters files based on filter and exposure time (see jeroen)
             self._determine_filename_sb2_param(filter, mode=mode),
-            "-vDA", # v = verbose, D = detect with the parameter file!, A= aperture photometry
+            "-vDA",  # v = verbose, D = detect with the parameter file!, A= aperture photometry
             mosaic_path,
         ]
 
-
         self._run_starbug2(cmd, toggle_sb_output_txt)
-  
+
         return print("--- Running stargbug finalized ---")
 
     def _run_starbug2(self, cmd, toggle_sb_output_txt):
@@ -455,10 +462,10 @@ class Pipeline_level_2_data:
             print()
 
         return
-    
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-# Management functions 
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+    # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    # Management functions
+    # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     def find_calibration_versions(self, filename):
         """
         print the used pipeline versions
@@ -476,14 +483,22 @@ class Pipeline_level_2_data:
         for prt, ext in zip(proccessing_print, proccessing_ext):
             print(prt + str(fits.open(filename)[0].header[f"{ext}"]))
         return
-    
+
     def _read_fits_detections(self, filename_ap, filter):
         """
         Collects the x and y position alongside the magnitude error of detected sources from a starbug2 aperture photometry result file.
         """
         with fits.open(filename_ap) as hdul:
             d = hdul[1].data
-        return (d["xcentroid"], d["ycentroid"], d["RA"], d["DEC"], d["flag"], d[filter], d["e"+filter])
+        return (
+            d["xcentroid"],
+            d["ycentroid"],
+            d["RA"],
+            d["DEC"],
+            d["flag"],
+            d[filter],
+            d["e" + filter],
+        )
 
     def _collect_detections_mag_limited(self, filename_ap, filter, detection_sigma=2.0):
         """
@@ -502,7 +517,9 @@ class Pipeline_level_2_data:
         detection_mask = (magnitude_error_sources <= detection_sigma) & (
             flag_sources == 0
         )
-        print(f'Aperture detection eMAG limit [eMAG < {detection_sigma}] retains {np.sum(detection_mask)/len(magnitude_error_sources):.2f} of all detections')
+        print(
+            f"Aperture detection eMAG limit [eMAG < {detection_sigma}] retains {np.sum(detection_mask)/len(magnitude_error_sources):.2f} of all detections"
+        )
         return (
             (x_positions_sources[detection_mask], y_positions_sources[detection_mask]),
             (RA_position[detection_mask], DEC_position[detection_mask]),
@@ -525,6 +542,7 @@ class Pipeline_level_2_data:
             self._determine_filename_sb2_param(filter, mode="long"),
             self.files.file_paths_1overf_jhat[filter][IMAGE_INDEX],
         ]
+
     def _get_cmd_known_sources(self, starbug_path, source_path, filter, IMAGE_INDEX):
 
         return [
@@ -536,13 +554,15 @@ class Pipeline_level_2_data:
             "-AB",
             self.files.file_paths_1overf_jhat[filter][IMAGE_INDEX],
         ]
+
     def _make_pos_good_sources(self, filter):
-        return self.Catalogue.make_source_list(filt_mask_on=(filter, 2.0), outfile=str(PHOT_DIR / "test_pos.fits"))
+        return self.Catalogue.make_source_list(
+            filt_mask_on=(filter, 2.0), outfile=str(PHOT_DIR / "test_pos.fits")
+        )
 
-
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-# Basic Plotting functions - Need to go to PLOT_toolkit.py!
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    # Basic Plotting functions - Need to go to PLOT_toolkit.py!
+    # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
     def _collect_image(self, filename):
         return fits.open(filename)[1].data
@@ -569,12 +589,11 @@ class Pipeline_level_2_data:
             self.files.file_paths_1overf[filter][IMAGE_INDEX]
         )
 
-        #ax1.imshow(oneoverf, cmap="gray", vmin=vmin, vmax=vmax, origin="lower")
-        masked_array = np.ma.array (oneoverf, mask=np.isnan(oneoverf))
-        cmap= plt.cm.gray
-        cmap.set_bad('red',1.)
+        # ax1.imshow(oneoverf, cmap="gray", vmin=vmin, vmax=vmax, origin="lower")
+        masked_array = np.ma.array(oneoverf, mask=np.isnan(oneoverf))
+        cmap = plt.cm.gray
+        cmap.set_bad("red", 1.0)
         ax1.imshow(masked_array, cmap=cmap, vmin=vmin, vmax=vmax, origin="lower")
-
 
         bgd = self._collect_image(self.files.file_paths_jhat_bgd[filter][IMAGE_INDEX])
         ax2.imshow(image, cmap="gray", vmin=vmin, vmax=vmax, origin="lower")
@@ -598,6 +617,7 @@ class Pipeline_level_2_data:
                 f"Plots/bgd_cal_steps/I_{IMAGE_INDEX}_{filter}.pdf", bbox_inches="tight"
             )
         plt.show()
+
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # File organisation
@@ -700,7 +720,7 @@ class File_Finder:
 # ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= =======
 # The following code is a direct copy from https://github.com/chriswillott/jwst/blob/master/image1overf.py
 # ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= =======
-def sub1fimaging(cal2hdulist,sigma_bgmask,sigma_1fmask,splitamps,usesegmask):
+def sub1fimaging(cal2hdulist, sigma_bgmask, sigma_1fmask, splitamps, usesegmask):
     """
     Determine a 1/f correction for JWST imaging data.
     Input is a level 2 calibrated NIRISS or NIRCam image.
@@ -722,110 +742,140 @@ def sub1fimaging(cal2hdulist,sigma_bgmask,sigma_1fmask,splitamps,usesegmask):
     import numpy as np
     from astropy.io import fits
     from astropy.stats import SigmaClip
-    from astropy.convolution import Gaussian2DKernel,convolve
+    from astropy.convolution import Gaussian2DKernel, convolve
     from photutils.background import Background2D, MedianBackground
     from photutils.segmentation import detect_sources, make_2dgaussian_kernel
     from jwst.datamodels import dqflags
     from copy import deepcopy
-        
-        #Check subarray type and extract non-reference pixels 
-    if cal2hdulist['PRIMARY'].header['SUBARRAY']=='FULL': 
-        data = cal2hdulist['SCI'].data[4:2044,4:2044]
-        dq   = cal2hdulist['DQ'].data[4:2044,4:2044]
-    elif cal2hdulist['PRIMARY'].header['SUBARRAY']=='SUB256':
-        data = cal2hdulist['SCI'].data[:252,:252]
-        dq   = cal2hdulist['DQ'].data[:252,:252]
+
+    # Check subarray type and extract non-reference pixels
+    if cal2hdulist["PRIMARY"].header["SUBARRAY"] == "FULL":
+        data = cal2hdulist["SCI"].data[4:2044, 4:2044]
+        dq = cal2hdulist["DQ"].data[4:2044, 4:2044]
+    elif cal2hdulist["PRIMARY"].header["SUBARRAY"] == "SUB256":
+        data = cal2hdulist["SCI"].data[:252, :252]
+        dq = cal2hdulist["DQ"].data[:252, :252]
     else:
-        print ('Will not do 1/f subtraction for subarray of type {}'.format(cal2hdulist['PRIMARY'].header['SUBARRAY']))
+        print(
+            "Will not do 1/f subtraction for subarray of type {}".format(
+                cal2hdulist["PRIMARY"].header["SUBARRAY"]
+            )
+        )
         return data
-        
-    slowaxis = abs(cal2hdulist['PRIMARY'].header['SLOWAXIS'])
 
-    #Get a mask of bad pixels from the DQ array
-    mask = np.zeros(data.shape,dtype=bool)
-    i_yy,i_xx = np.where((np.bitwise_and(dq, dqflags.group['DO_NOT_USE']) == 1))
-    mask[i_yy,i_xx] = 1
+    slowaxis = abs(cal2hdulist["PRIMARY"].header["SLOWAXIS"])
 
-    #Make a flux distribution centered on the median that on the higher than median side is a reflection of the lower than median side.
-    #Assumption here is not huge variation in background across field, so median is a useful value of typical background level
-    #Note this mask is only used to generate the background model
-    gooddata = data[np.where(mask==0)]
+    # Get a mask of bad pixels from the DQ array
+    mask = np.zeros(data.shape, dtype=bool)
+    i_yy, i_xx = np.where((np.bitwise_and(dq, dqflags.group["DO_NOT_USE"]) == 1))
+    mask[i_yy, i_xx] = 1
+
+    # Make a flux distribution centered on the median that on the higher than median side is a reflection of the lower than median side.
+    # Assumption here is not huge variation in background across field, so median is a useful value of typical background level
+    # Note this mask is only used to generate the background model
+    gooddata = data[np.where(mask == 0)]
     median = np.median(gooddata)
-    lowpixels = np.where(gooddata<median)
-    bgpixels = np.concatenate(((gooddata[lowpixels]-median),(median-gooddata[lowpixels])))
-    #Add to mask all pixels that have flux < or > 3sigma of this flux distribution 
-    mask[np.where(data>(median+sigma_bgmask*np.std(bgpixels)))] = 1
-    mask[np.where(data<(median-sigma_bgmask*np.std(bgpixels)))] = 1
+    lowpixels = np.where(gooddata < median)
+    bgpixels = np.concatenate(
+        ((gooddata[lowpixels] - median), (median - gooddata[lowpixels]))
+    )
+    # Add to mask all pixels that have flux < or > 3sigma of this flux distribution
+    mask[np.where(data > (median + sigma_bgmask * np.std(bgpixels)))] = 1
+    mask[np.where(data < (median - sigma_bgmask * np.std(bgpixels)))] = 1
 
-    #testhdulist = deepcopy(cal2hdulist)
-    #testdata =  deepcopy(data)
-    #testdata[np.where(mask>0)] = 0.0
-    #testhdulist['SCI'].data = testdata
-    #testoutfile='testmaskinit.fits'
-    #testhdulist.writeto(testoutfile,overwrite=True)    
+    # testhdulist = deepcopy(cal2hdulist)
+    # testdata =  deepcopy(data)
+    # testdata[np.where(mask>0)] = 0.0
+    # testhdulist['SCI'].data = testdata
+    # testoutfile='testmaskinit.fits'
+    # testhdulist.writeto(testoutfile,overwrite=True)
 
-    #Do a background subtraction to separate background variations from 1/f stripe determination
-    sigma_clip_forbkg = SigmaClip(sigma=3., maxiters=5)
+    # Do a background subtraction to separate background variations from 1/f stripe determination
+    sigma_clip_forbkg = SigmaClip(sigma=3.0, maxiters=5)
     bkg_estimator = MedianBackground()
-    bkg = Background2D(data, (34, 34),filter_size=(5, 5), mask=mask, sigma_clip=sigma_clip_forbkg, bkg_estimator=bkg_estimator)
-    bksubdata = data-bkg.background
+    bkg = Background2D(
+        data,
+        (34, 34),
+        filter_size=(5, 5),
+        mask=mask,
+        sigma_clip=sigma_clip_forbkg,
+        bkg_estimator=bkg_estimator,
+    )
+    bksubdata = data - bkg.background
 
-    #Remake mask on background-subtracted data, 
-    #Two options - use segmentation region on smoothed image 
-    #            - use same method as before but now clipping at < or > sigma_1fmask sigma of the flux distribution 
-    mask = np.zeros(data.shape,dtype=bool)
-    mask[i_yy,i_xx] = 1
+    # Remake mask on background-subtracted data,
+    # Two options - use segmentation region on smoothed image
+    #            - use same method as before but now clipping at < or > sigma_1fmask sigma of the flux distribution
+    mask = np.zeros(data.shape, dtype=bool)
+    mask[i_yy, i_xx] = 1
     if usesegmask:
 
         # Silence this specific convolution warning
         import warnings
         from astropy.utils.exceptions import AstropyWarning
-        warnings.filterwarnings('ignore', category=AstropyWarning, message=".*nan_treatment='interpolate'.*")
+
+        warnings.filterwarnings(
+            "ignore", category=AstropyWarning, message=".*nan_treatment='interpolate'.*"
+        )
 
         # Before detection, smooth image with Gaussian FWHM = 5 pixels - this gives better balance between stars and BCGs because ghosts are more diffuse than stars
         kernel = make_2dgaussian_kernel(5.0, size=5)
         convolved_bksubdata = convolve(bksubdata, kernel)
         bksubdata_masked = np.ma.masked_array(bksubdata, mask=mask)
-        clippedsigma = np.std(sigma_clip_forbkg(bksubdata_masked, masked=True, copy=False))
-        #print (clippedsigma)
-        photthreshold = sigma_1fmask*clippedsigma
-        segm_detect = detect_sources(convolved_bksubdata, photthreshold, mask=mask, n_pixels=7) # changed npixels -> n_pixels for new astropy
+        clippedsigma = np.std(
+            sigma_clip_forbkg(bksubdata_masked, masked=True, copy=False)
+        )
+        # print (clippedsigma)
+        photthreshold = sigma_1fmask * clippedsigma
+        segm_detect = detect_sources(
+            convolved_bksubdata, photthreshold, mask=mask, n_pixels=7
+        )  # changed npixels -> n_pixels for new astropy
         segimage = segm_detect.data.astype(np.uint32)
-        mask[np.where(segimage>0)] = 1
-    else:     
-        gooddata = bksubdata[np.where(mask==0)]
+        mask[np.where(segimage > 0)] = 1
+    else:
+        gooddata = bksubdata[np.where(mask == 0)]
         median = np.median(gooddata)
-        negpixels = np.where(gooddata<median)
-        bgpixels = np.concatenate(((gooddata[negpixels]-median),(median-gooddata[negpixels])))
-        mask[np.where(bksubdata>(median+sigma_1fmask*np.std(bgpixels)))] = 1
-        mask[np.where(bksubdata<(median-sigma_1fmask*np.std(bgpixels)))] = 1
-    
-    #testdata =  deepcopy(bksubdata)
-    #testdata[np.where(mask>0)] = 0.0
-    #testhdulist['SCI'].data = testdata
-    #testhdulist['ERR'].data = segimage
-    #testoutfile='testmaskpostbkg_seg_sigma_1fmask0p7.fits'
-    #testhdulist.writeto(testoutfile,overwrite=True)    
+        negpixels = np.where(gooddata < median)
+        bgpixels = np.concatenate(
+            ((gooddata[negpixels] - median), (median - gooddata[negpixels]))
+        )
+        mask[np.where(bksubdata > (median + sigma_1fmask * np.std(bgpixels)))] = 1
+        mask[np.where(bksubdata < (median - sigma_1fmask * np.std(bgpixels)))] = 1
 
-    #Make masked array of background-subtracted data and then take median along columns (slowaxis=1) or rows (slowaxis=2)
-    #if splitamps is True and full frame then define sections of 4 amps and fit and subtract each separately
-    if splitamps==True and cal2hdulist['PRIMARY'].header['SUBARRAY']=='FULL':
-        stripes=np.zeros(data.shape)
-        #define sections - sub off 4 because reference pixels already removed
-        loamp=np.array([4,512,1024,1536])-4
-        hiamp=np.array([512,1024,1536,2044])-4
-        numamps=loamp.size
+    # testdata =  deepcopy(bksubdata)
+    # testdata[np.where(mask>0)] = 0.0
+    # testhdulist['SCI'].data = testdata
+    # testhdulist['ERR'].data = segimage
+    # testoutfile='testmaskpostbkg_seg_sigma_1fmask0p7.fits'
+    # testhdulist.writeto(testoutfile,overwrite=True)
+
+    # Make masked array of background-subtracted data and then take median along columns (slowaxis=1) or rows (slowaxis=2)
+    # if splitamps is True and full frame then define sections of 4 amps and fit and subtract each separately
+    if splitamps == True and cal2hdulist["PRIMARY"].header["SUBARRAY"] == "FULL":
+        stripes = np.zeros(data.shape)
+        # define sections - sub off 4 because reference pixels already removed
+        loamp = np.array([4, 512, 1024, 1536]) - 4
+        hiamp = np.array([512, 1024, 1536, 2044]) - 4
+        numamps = loamp.size
         for k in range(numamps):
-            if slowaxis==1:
-                maskedbksubdata = np.ma.array(bksubdata[loamp[k]:hiamp[k],:], mask=mask[loamp[k]:hiamp[k],:])
-                stripes[loamp[k]:hiamp[k],:] = np.ma.median(maskedbksubdata, axis=(slowaxis-1),keepdims=True)
-            elif slowaxis==2:
-                maskedbksubdata = np.ma.array(bksubdata[:,loamp[k]:hiamp[k]], mask=mask[:,loamp[k]:hiamp[k]])
-                stripes[:,loamp[k]:hiamp[k]] = np.ma.median(maskedbksubdata, axis=(slowaxis-1),keepdims=True)
-    else:        
+            if slowaxis == 1:
+                maskedbksubdata = np.ma.array(
+                    bksubdata[loamp[k] : hiamp[k], :], mask=mask[loamp[k] : hiamp[k], :]
+                )
+                stripes[loamp[k] : hiamp[k], :] = np.ma.median(
+                    maskedbksubdata, axis=(slowaxis - 1), keepdims=True
+                )
+            elif slowaxis == 2:
+                maskedbksubdata = np.ma.array(
+                    bksubdata[:, loamp[k] : hiamp[k]], mask=mask[:, loamp[k] : hiamp[k]]
+                )
+                stripes[:, loamp[k] : hiamp[k]] = np.ma.median(
+                    maskedbksubdata, axis=(slowaxis - 1), keepdims=True
+                )
+    else:
         maskedbksubdata = np.ma.array(bksubdata, mask=mask)
-        stripes = np.ma.median(maskedbksubdata, axis=(slowaxis-1),keepdims=True)
+        stripes = np.ma.median(maskedbksubdata, axis=(slowaxis - 1), keepdims=True)
 
-    correcteddata = data-stripes
+    correcteddata = data - stripes
 
     return correcteddata

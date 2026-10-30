@@ -11,14 +11,18 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Run StarBugII aperture photometry on a JWST NIRCam mosaic."
     )
-    parser.add_argument("--filter", required=True, help="JWST filter, e.g. F115W F187N, F335M, F277W, F200W, F444W, F182M, F430M, F090W, F356W, F150W, F480M, F212N")
+    parser.add_argument(
+        "--filter",
+        required=True,
+        help="JWST filter, e.g. F115W F187N, F335M, F277W, F200W, F444W, F182M, F430M, F090W, F356W, F150W, F480M, F212N",
+    )
     parser.add_argument("--ncpu", required=True, help="Number of cpu cores")
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
-    filter_ = args.filter 
+    filter_ = args.filter
     ncpu = args.ncpu
 
     PHOTOMETRIC_pipeline = PPL.Pipeline_level_2_data(
