@@ -30,8 +30,6 @@ if MPLSTYLE.exists():
 # ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= =======
 # Data reduction pipeline for level 2 data, single dither or full mosaic
 # ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= =======
-
-
 class Pipeline_level_2_data:
     """
     Helper class build around the in/output of starbug2
