@@ -48,10 +48,11 @@ class Accretion_Finder:
         # Apply maximum magnitude error cut
         self.photometry_data = photometry_data[sigma_3 < max_mag_err]
 
-        # Sort data based on the C1-C2 color (Required for running median & makes sure we dont forget)
-        self.sorting_sequence = np.argsort((self.photometry_data[C1_name]-self.photometry_data[C2_name]))
+        # Sort data based on the C1-C3 color (Required for running median)
+        self.sorting_sequence = np.argsort((self.photometry_data[C1_name]-self.photometry_data[C3_name]))
         self.photometry_data = self.photometry_data[self.sorting_sequence]
 
+        # Read the colors, sorted based on C1-C3
         self.C1, self.C2, self.C3 = (self.photometry_data[n] for n in names)
         self.eC1, self.eC2, self.eC3 = (self.photometry_data["e" + n] for n in names)        
         self.C1_C2_color = self.C1 - self.C2
@@ -63,15 +64,14 @@ class Accretion_Finder:
         self.C1_C2_eMag = np.hypot(self.eC1, self.eC2)
         self.C1_C3_eMag = np.hypot(self.eC1, self.eC3)
         return
-
-    def Select_CC_outliers(self, min_mag_diff, nsigma=4):
-        n_sigma_below_data = self.C1_C2_color - (nsigma * self.C1_C2_eMag)
-        self.excess_mask = n_sigma_below_data > (self.rolling_median_C1_C2 + min_mag_diff)
-        print(f'Found {np.sum(self.excess_mask)} out of {len(self.excess_mask)} excess sources')
-        return 
-
-
-    def Compute_rolling_median(self, window_size = 10000):
+    
+    
+    def Set_template_Guido_2010(self):
+        self.Select_CC_outliers(min_mag_diff=0.1, nsigma=4)
+        self.Compute_rolling_median(window_size=100)
+        return
+    
+    def Compute_rolling_median(self, window_size = 1):
         """
         example:
         s = pd.Series([0, 1, 2, 3, 4])
@@ -89,10 +89,24 @@ class Accretion_Finder:
         # Compute the rolling median
         # Center = True ensures the median computes is for the index we are at
         # min_periods sets the first [0, 1, ..., window_size/2] values to nan
-        self.rolling_median_C1_C2 = (
+        self.template_C1_C2 = (
             pd.Series(self.C1_C2_color)
             .rolling(window_size, center=True, min_periods=1)
             .median()
             .to_numpy()
         )
         return
+    
+    def Select_CC_outliers(self, min_mag_diff, nsigma=4):
+        """
+        Excess if the C1-C2 colour exceeds the template by
+        (a) > n sigma its own uncertainty
+        AND
+        (b) > min_mag_diff mag.
+        """
+        diff = self.C1_C2_color - self.template_C1_C2
+        self.excess_mask = (diff > nsigma * self.C1_C2_eMag) & (diff > min_mag_diff)
+        print(f"Found {np.sum(self.excess_mask)} out of {len(self.excess_mask)} excess sources")
+        return
+
+

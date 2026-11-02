@@ -46,21 +46,6 @@ wave_br_alpha = 4.051 * u.um
 lam_pa = wave_pa_alpha.to(u.AA).value
 lam_br = wave_br_alpha.to(u.AA).value
 
-all_filters = [
-    "F090W",
-    "F115W",
-    "F150W",
-    "F182M",
-    "F187N",
-    "F200W",
-    "F212N",
-    "F277W",
-    "F335M",
-    "F356W",
-    "F430M",
-    "F444W",
-    "F480M",
-]
 
 
 def create_wavelength_space_um():
@@ -191,9 +176,9 @@ class Line_Strength:
         wave_AA = (self.wave_um).to(u.AA).value
         return wave_AA * self._flam(sp)  # [erg/s/cm2]
 
-    def Plot_spectrum_modeled_source(self, Weq1, Weq2):
+    def Plot_spectrum_modeled_source(self, Weq1, Weq2, extra_line=None):
         def add_zoom(
-            fig, ax_main, ax_zoom, x, y_cont, ytot, xlim, color_spine, Filter_range=None
+            fig, ax_main, ax_zoom, x, y_cont, ytot, xlim, color_spine, Filter_range=None, 
         ):
             # force consistent units
             x0, x1 = (xlim[0].to(u.um).value, xlim[1].to(u.um).value)
@@ -264,8 +249,19 @@ class Line_Strength:
             "--",
             c="black",
             lw=1,
-            label="Continuum",
+            label="Total energy flux (Bessel)",
         )
+        if extra_line is not None:
+            ax0.plot(
+                        self.wave_um,
+                        extra_line / normalisation,
+                        ":",
+                        c="gray",
+                        lw=2,
+                        label='ROB_17'
+                    )
+
+
         for lam, name, col in [
             (0.3645, "Balmer break", "gray"),
             (0.6563, r"H$\alpha$", "gray"),
@@ -340,10 +336,11 @@ class Line_Strength:
 
         ax0.set_xscale("log")
         ax0.set_yscale("log")
-        ax0.set_xlabel(r"$\lambda\ [\mu\mathrm{m}]$")
-        ax0.set_ylabel(r"$\lambda F_\lambda\ [\mathrm{erg\,s^{-1}\,cm^{-2}}]$")
-        ax0.set_ylabel(r"$\lambda F_\lambda$ / max($\lambda F_\lambda^{\rm total}$)")
+        ax0.set_xlabel(r"$\lambda\ [\mu\mathrm{m}]$", fontsize=15)
+        ax0.set_ylabel(r"$\lambda F_\lambda\ [\mathrm{erg\,s^{-1}\,cm^{-2}}]$", fontsize=15)
+        ax0.set_ylabel(r"$\lambda F_\lambda$ / max($\lambda F_\lambda^{\rm total}$)", fontsize=15)
         ax0.legend()
+        plt.savefig('Test_flux_dist.pdf', bbox_inches='tight')
         plt.show()
         return
 
@@ -397,6 +394,8 @@ class Line_Strength:
                 f" \n Parameter ranges include more than 1 model, showing first idx!!!"
             )
             sp_continuum = systems[cleaned_names[0]]
+            for param in param_table[np.argwhere(cleaned_names[0]==names)]:
+                print(param)
 
         if len(cleaned_names) < 1:
             warnings.warn(f"Warning...........Parameter ranges include 0 model!!!")
@@ -424,7 +423,7 @@ class Line_Strength:
         sp_continuum = SourceSpectrum.from_file(
             str(model_path_to_use), wave_col="WAVELENGTH", flux_col=g_surface
         )
-
+        sp_continuum*= (((const.R_sun / (200000*u.lyr)).decompose()).value) ** (2) 
         return sp_continuum
 
     def _Obtain_continuum_Bessel_plus_BB(self, T_eff=5000, g_surface="g45"):
@@ -441,7 +440,11 @@ class Line_Strength:
         scale = ((const.kpc / const.R_sun).value) ** (2)
         bb_disc = SourceSpectrum(BlackBodyNorm1D, temperature=T_disc) * scale
         sp_disk = bb_disc * disc_scale
-        return sp_star + sp_disk
+
+        sp_continuum =  sp_star + sp_disk
+
+        sp_continuum *= (((const.R_sun / (200000*u.lyr)).decompose()).value) ** (2) 
+        return
 
 def Compute_delta_m_weq(lam0, filters, N_Weq=100, continuum_mode="Bessel", **kwargs):
     SPEC = Line_Strength(continuum_mode=continuum_mode, **kwargs)
@@ -477,10 +480,10 @@ def Plot_delta_m_weq(Weqs, mag_diff_dic):
             Weqs, mag_diff_data, c=color, edgecolors="black", marker="o", label=mag_diff
         )
 
-    ax.axhline(0.3, ls="--", lw=2, c="black")
+    #ax.axhline(0.1, ls="--", lw=2, c="black")
 
-    ax.set_ylabel(r"$\Delta m = m_{\mathrm{no \ line}} - m_{\mathrm{line}}$")
-    ax.set_xlabel(r"$W_{eq}$ [Å]")
+    ax.set_ylabel(r"$\Delta m = m_{\mathrm{no \ line}} - m_{\mathrm{line}}$", fontsize=15)
+    ax.set_xlabel(r"$W_{eq}$ [Å]", fontsize=15)
 
     ax.set_xscale("log")
     ax.set_yscale("linear")

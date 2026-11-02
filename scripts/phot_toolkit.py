@@ -51,21 +51,21 @@ class Read_Catalogue:
         )
         return
 
-    def mask_sources_on_filter(self, filter, detection_limit=2.0):
-        self.cat_filter_mask = self.cat_data["e" + filter] < detection_limit
+    def mask_sources_on_FILTERer(self, FILTERer, detection_limit=2.0):
+        self.cat_FILTERer_mask = self.cat_data["e" + FILTERer] < detection_limit
         return
 
-    def make_source_list(self, filt_mask_on=None, outfile="Photometry/test_pos.fits"):
+    def make_source_list(self, FILTER_mask_on=None, outfile="Photometry/test_pos.fits"):
         tab = Table.read(self.catalogue_path, hdu=1)
 
-        if filt_mask_on == None:
+        if FILTER_mask_on == None:
             new = tab[["Catalogue_Number", "RA", "DEC"]]
         else:
-            if type(filt_mask_on) == tuple:
-                self.mask_sources_on_filter(
-                    filt_mask_on[0], detection_limit=filt_mask_on[1]
+            if type(FILTER_mask_on) == tuple:
+                self.mask_sources_on_FILTERer(
+                    FILTER_mask_on[0], detection_limit=FILTER_mask_on[1]
                 )
-                new = tab[["Catalogue_Number", "RA", "DEC"]][self.cat_filter_mask]  #
+                new = tab[["Catalogue_Number", "RA", "DEC"]][self.cat_FILTERer_mask]  #
             else:
                 return print("HELP")
 
@@ -160,11 +160,9 @@ def in_wcs_mask(ra, dec, wcs, shape):
 
 
 
-
-def Split_Mosaic_on_WHT(
-    mosaic_path=str(LEVEL3_DIR) + "mosaic_F115W_final_i2d.fits",filt='F115W', wht_threshold=200.0
+def Split_Mosaic_on_WHT(FILTER='F115W', wht_threshold=200.0
 ):
-
+    mosaic_path=str(LEVEL3_DIR) + f"mosaic_{FILTER}_final_i2d.fits"
     hdu = fits.open(mosaic_path)
 
     # Build masks & Apply
@@ -203,15 +201,37 @@ def Split_Mosaic_on_WHT(
 
     hdu_out = fits.HDUList([fits.PrimaryHDU(header=hdu[0].header)] + long_exposure_data)
     hdu_out.writeto(
-        str(LEVEL3_DIR) + f"/mosaic_{filt}_long_exposure.fits", overwrite=True
+        str(LEVEL3_DIR) + f"/mosaic_{FILTER}_long_exposure.fits", overwrite=True
     )
 
     hdu_out = fits.HDUList(
         [fits.PrimaryHDU(header=hdu[0].header)] + short_exposure_data
     )
     hdu_out.writeto(
-        str(LEVEL3_DIR) + f"/mosaic_{filt}_short_exposure.fits", overwrite=True
+        str(LEVEL3_DIR) + f"/mosaic_{FILTER}_short_exposure.fits", overwrite=True
     )
 
     hdu.close()
+    print("----Completed-Splitting-Mosaic----")
     return
+
+
+def merge_catalogues(long_file, short_file, out_file, match_arcsec=0.06):
+    def load(f):
+        t = Table.read(f, hdu=1)
+        return t
+
+    deep, shallow = load(long_file), load(short_file)
+
+    c_deep = SkyCoord(deep["RA"], deep["DEC"], unit="deg")
+    c_shal = SkyCoord(shallow["RA"], shallow["DEC"], unit="deg")
+
+    _, sep, _ = c_shal.match_to_catalog_sky(c_deep)
+    keep = sep > match_arcsec * u.arcsec
+
+    merged = np.vstack([deep, shallow[keep]], join_type="outer")
+    merged.write(out_file, overwrite=True)
+
+    print(f"deep: {len(deep)}, shallow: {len(shallow)}, "
+          f"duplicates dropped: {(~keep).sum()}, merged: {len(merged)}")
+    return merged

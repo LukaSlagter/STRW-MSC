@@ -24,8 +24,8 @@ from Config import (
     STARBUG2_BIN,
 )
 
-# if MPLSTYLE.exists():
-#     plt.style.use(str(MPLSTYLE))
+if MPLSTYLE.exists():
+    plt.style.use(str(MPLSTYLE))
 
 # ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= =======
 # Data reduction pipeline for level 2 data, single dither or full mosaic
@@ -34,7 +34,6 @@ class Pipeline_level_2_data:
     """
     Helper class build around the in/output of starbug2
     """
-
     def __init__(self, working_directory=""):
         self.wdir = working_directory
         self.files = File_Finder(self.wdir)
@@ -48,138 +47,49 @@ class Pipeline_level_2_data:
     # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     # Aperture photometry
     # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-    def Run_AP_on_individual_lvl2_dither(
+    def Calibrate_all_dithers(
         self,
-        IMAGE_INDEX=28,
-        detection_sigma=2.0,
+        FILTER="",
         overwrite_dic={
             "1/f": False,
             "Jhat calibration": False,
-            "SB2": False,
         },
-        save_cal_step_plot=False,
-        known_sources=False,
-    ):
-        self.aperture_data = {}
-        self.wcs_align = {}
-        self.pixel_coord_sources = {}
-        self.world_coord_sources = {}
-        self.magnitudes = {}
+       
+    ):  # standard level 3 output directory for all frames!
+        print(f"----Initializing dither calibration for {FILTER}---------")
+        Number_of_frames = len(self.files.file_paths_1overf[FILTER])
+        print(f"----We have a total of {Number_of_frames}# to run----------")
 
-        filt1 = "F115W"
-
-        for filt in [filt1]:
-            print(f"Initializing for {filt}...")
+        # Running 1/f
+        for IMAGE_INDEX in tqdm.tqdm(
+            range(Number_of_frames), desc="(1) Calibrating 1/f"
+        ):  #
             if (
-                Path(self.files.file_paths_1overf[filt][IMAGE_INDEX]).exists() == False
+                Path(self.files.file_paths_1overf[FILTER][IMAGE_INDEX]).exists() == False
                 or overwrite_dic["1/f"] == True
             ):
-                print(f"    (1) Calibrating 1/f")
-                self.calibrate_one_over_f(IMAGE_INDEX, filt)
-            else:
-                print(f"    (SKIPPED) Calibrating 1/f            -- Using previous run")
+                self.calibrate_one_over_f(IMAGE_INDEX, FILTER)
+
+        # Running wcs on own gaia dr3!
+        for IMAGE_INDEX in tqdm.tqdm(
+            range(Number_of_frames), desc="(2) Aligning with gaia catalog"
+        ):
             if (
-                Path(self.files.file_paths_1overf_jhat[filt][IMAGE_INDEX]).exists() == False
+                Path(self.files.file_paths_1overf_jhat[FILTER][IMAGE_INDEX]).exists() == False
                 or overwrite_dic["Jhat calibration"] == True
             ):
-                print(f"    (2) Aligning with gaia catalog")
-                self.assign_WCS_from_gaia_dr3(IMAGE_INDEX=IMAGE_INDEX, filter=filt)
-            else:
-                print(f"    (SKIPPED) Aligning with gaia catalog -- Using previous run")
-
-            self.starbug2_aperture_photometry_on_dither(
-                IMAGE_INDEX=IMAGE_INDEX,
-                filter=filt,
-                remove_background=True,
-                toggle_sb_output_txt=True,
-                overwrite_always_run=overwrite_dic["SB2"],
-                known_sources=known_sources,
-            )
-
-            self.aperture_data[filt] = fits.open(
-                self.files.file_paths_jhat_ap[filt][IMAGE_INDEX]
-            )[1].data
-
-            # Use the gaia wcs of the image
-            self.wcs_align[filt] = self._collect_wcs_of_SB2_detections(
-                IMAGE_INDEX=IMAGE_INDEX,
-                filter=filt,
-            )
-            # Pixel coordinates of detected sources
-            (
-                self.pixel_coord_sources[filt],
-                self.world_coord_sources[filt],
-                self.magnitudes[filt],
-            ) = self._collect_detections_mag_limited(
-                filename_ap=self.files.file_paths_jhat_ap[filt][IMAGE_INDEX],
-                filter=filt,
-                detection_sigma=detection_sigma,
-            )
-
-            # always plot, just the save!
-            self.plot_cal_steps_per_filter(
-                IMAGE_INDEX=IMAGE_INDEX, filter=filt, save=save_cal_step_plot
-            )
-
-        print("----Pipeline Versions-----")
-        self.find_calibration_versions(
-            self.files.file_paths_1overf_jhat[filt][IMAGE_INDEX]
-        )
-        print("--------Completed--------")
+                self.assign_WCS_from_gaia_dr3(IMAGE_INDEX=IMAGE_INDEX, FILTER=FILTER)
         return
 
-    def Load_AP_on_individual_lvl2_dither(
-        self, IMAGE_INDEXS=[28, 29], filts=["F115W"], detection_sigma=2.0
-    ):
-        self.aperture_data = {}
-        self.wcs_align = {}
-        self.pixel_coord_sources = {}
-        self.world_coord_sources = {}
-        self.magnitudes = {}
-
-        for filt in filts:
-            self.aperture_data[filt] = {}
-            self.wcs_align[filt] = {}
-            self.pixel_coord_sources[filt] = {}
-            self.world_coord_sources[filt] = {}
-            self.magnitudes[filt] = {}
-
-            for IMAGE_INDEX in IMAGE_INDEXS:
-
-                self.aperture_data[filt][IMAGE_INDEX] = fits.open(
-                    self.files.file_paths_jhat_ap[filt][IMAGE_INDEX]
-                )[1].data
-
-                # Use the gaia wcs of the image
-                self.wcs_align[filt][IMAGE_INDEX] = self._collect_wcs_of_SB2_detections(
-                    IMAGE_INDEX=IMAGE_INDEX,
-                    filter=filt,
-                )
-                # Pixel coordinates of detected sources
-                (
-                    self.pixel_coord_sources[filt][IMAGE_INDEX],
-                    self.world_coord_sources[filt][IMAGE_INDEX],
-                    self.magnitudes[filt][IMAGE_INDEX],
-                ) = self._collect_detections_mag_limited(
-                    filename_ap=self.files.file_paths_jhat_ap[filt][IMAGE_INDEX],
-                    filter=filt,
-                    detection_sigma=detection_sigma,
-                )
-        return
-
-    def Run_AP_on_all_dither(
-        self,
-        filt="",
-        overwrite_dic={
-            "1/f": False,
-            "Jhat calibration": False,
-            "Association file": False,
-            "Image3Pipeline": False,
-        },
-        output_dir=LEVEL3_DIR,
-    ):  # standard level 3 output directory for all frames!
-        print(f"----Initializing Pipeline for {filt}---------")
-
+    def Create_Mosaic(self,
+                      FILTER="",
+                        overwrite_dic={
+                            "Association file": False,
+                            "Image3Pipeline file": False,
+                        },
+                        output_dir=LEVEL3_DIR):
+        
+        print(f"----Initializing mosaicing for {FILTER}---------")
         os.environ["CRDS_PATH"] = os.path.expanduser("~/crds_cache")
         os.environ["CRDS_CONTEXT"] = "jwst_1584.pmap"
         os.environ["CRDS_SERVER_URL"] = "https://jwst-crds.stsci.edu"
@@ -189,33 +99,10 @@ class Pipeline_level_2_data:
         from jwst.associations import asn_from_list
         from jwst.associations.lib.rules_level3_base import DMS_Level3_Base
 
-        mosaic_title = f"mosaic_{filt}_final"
+        mosaic_title = f"mosaic_{FILTER}_final"
         association_path = str(output_dir) + f"/{mosaic_title}.json"
         mosaic_path = output_dir + f"/{mosaic_title}_i2d.fits"
         print(f"----Results stored in {mosaic_title}-----")
-
-        Number_of_frames = len(self.files.file_paths_1overf[filt])
-        print(f"----We have a total of {Number_of_frames}# to run----------")
-
-        # Running 1/f
-        for IMAGE_INDEX in tqdm.tqdm(
-            range(Number_of_frames), desc="(1) Calibrating 1/f"
-        ):  #
-            if (
-                Path(self.files.file_paths_1overf[filt][IMAGE_INDEX]).exists() == False
-                or overwrite_dic["1/f"] == True
-            ):
-                self.calibrate_one_over_f(IMAGE_INDEX, filt)
-
-        # Running wcs on own gaia dr3!
-        for IMAGE_INDEX in tqdm.tqdm(
-            range(Number_of_frames), desc="(2) Aligning with gaia catalog"
-        ):
-            if (
-                Path(self.files.file_paths_1overf_jhat[filt][IMAGE_INDEX]).exists() == False
-                or overwrite_dic["Jhat calibration"] == True
-            ):
-                self.assign_WCS_from_gaia_dr3(IMAGE_INDEX=IMAGE_INDEX, filter=filt)
 
         # Now we have filled each folder with its 1/f calibrated fits file with its WCS attached
         print("(3) Creating association file")
@@ -225,11 +112,7 @@ class Pipeline_level_2_data:
         if (Path(association_path).exists() == False) or (
             overwrite_dic["Association file"] == True
         ):
-            #!!!!!!
-            # Remember to dissable mask if runinng all!!!!!
-            #!!!!!!
-
-            cal_files = self.files.file_paths_1overf_jhat[filt][:Number_of_frames]
+            cal_files = self.files.file_paths_1overf_jhat[FILTER]
             asn = asn_from_list.asn_from_list(
                 cal_files, rule=DMS_Level3_Base, product_name=mosaic_title
             )
@@ -259,11 +142,44 @@ class Pipeline_level_2_data:
         print("----Completed----")
         return
 
+    def Compute_Aperture_Photometry_Mosaic(self, FILTER, wht_threshold, ncpu = 2):
+        """
+        Run starbug2 aperture source detection and photometry on final mosaic.
+        Consider the selection parameters based on the WHT extension, splitting the deep/long exposed region 
+        and the shallow/shorter exposed. Final catalgoue is merged with detection of overlapping sources
+        """
+        # Create binary distinction for based on the WHT_threshold!
+        PTK.Split_Mosaic_on_WHT(FILTER=FILTER, wht_threshold = int(wht_threshold))
+
+        for mode in ['short','long']:
+            mosaic_path = str(LEVEL3_DIR) + f"/mosaic_{FILTER}_{mode}_exposure.fits"
+            print(f"Will run Starbug2 on {mosaic_path}")
+            if Path(mosaic_path).exists():
+                self.starbug2_aperture_photometry_on_mosaic(
+                    mosaic_path=mosaic_path,
+                    filter=FILTER,
+                    mode=mode,
+                    toggle_sb_output_txt=True,
+                    N_CPUS=ncpu,
+                )
+            else:
+                print(f"Path doesn't exist: {mosaic_path}")
+
+        out_file  = str(LEVEL3_DIR)   + f"/mosaic_{FILTER}_merged_exposure-ap.fits"
+        PTK.merge_catalogues(long_file = str(LEVEL3_DIR) + f"/mosaic_{FILTER}_long_exposure-ap.fits",
+                            short_file = str(LEVEL3_DIR) + f"/mosaic_{FILTER}_short_exposure-ap.fits", 
+                            out_file  = out_file, 
+                            match_arcsec=0.06)
+
+        return out_file
+
+
+
     # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     # 1/f calibration
     # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    def calibrate_one_over_f(self, IMAGE_INDEX, filt):
+    def calibrate_one_over_f(self, IMAGE_INDEX, FILTER):
         """
         Remove 1/f (pink noise) from  level 2 calibrated JWST observations using a row-wise median approach by using the
         image1overf.py tool from C. Willott (2022).
@@ -271,7 +187,7 @@ class Pipeline_level_2_data:
         Parameters are default
         """
 
-        with fits.open(self.files.file_paths[filt][IMAGE_INDEX]) as cal2hdulist:
+        with fits.open(self.files.file_paths[FILTER][IMAGE_INDEX]) as cal2hdulist:
             if (
                 cal2hdulist["PRIMARY"].header["SUBARRAY"] == "FULL"
                 or cal2hdulist["PRIMARY"].header["SUBARRAY"] == "SUB256"
@@ -290,7 +206,7 @@ class Pipeline_level_2_data:
                 cal2hdulist["SCI"].data[:252, :252] = correcteddata
 
             cal2hdulist.writeto(
-                self.files.file_paths_1overf[filt][IMAGE_INDEX], overwrite=True
+                self.files.file_paths_1overf[FILTER][IMAGE_INDEX], overwrite=True
             )
         return
 
@@ -298,17 +214,17 @@ class Pipeline_level_2_data:
     # Jhat alignment & WCS transformations
     # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-    def assign_WCS_from_gaia_dr3(self, IMAGE_INDEX, filter="F187N"):
+    def assign_WCS_from_gaia_dr3(self, IMAGE_INDEX, FILTER="F187N"):
         """
         Assing a World Coordinate System (wcs) to a single jwst field using the downloaded gaia catalog (5' around ngc 346)
 
-        Uses the same sharpness/roundness parameters as used later by starbug, different per filter!!
+        Uses the same sharpness/roundness parameters as used later by starbug, different per FILTER!!
         """
-        out_put_dir = str(Path(self.files.file_paths[filter][IMAGE_INDEX]).parent)
+        out_put_dir = str(Path(self.files.file_paths[FILTER][IMAGE_INDEX]).parent)
         prev_cwd = os.getcwd()
         os.chdir(out_put_dir)
         config = PTK.load_starbug_params(
-            self._determine_filename_sb2_param(filter=filter, mode="short")
+            self._determine_filename_sb2_param(FILTER=FILTER, mode="short")
         )
 
         import jhat
@@ -318,7 +234,7 @@ class Pipeline_level_2_data:
         new_line = "\n"
         try:
             wcs_align.run_all(
-                self.files.file_paths_1overf[filter][IMAGE_INDEX],
+                self.files.file_paths_1overf[FILTER][IMAGE_INDEX],
                 telescope="jwst",
                 # outsubdir= out_put_dir ,  # Leave out as we manually switch to it with OS (see above code)
                 imagetype="cal",  # Need to specify as the filename is ext3
@@ -360,11 +276,11 @@ class Pipeline_level_2_data:
         """
         return wcs.world_to_pixel_values(*world_coords)
 
-    def _collect_wcs_of_SB2_detections(self, IMAGE_INDEX=0, filter="F187N"):
+    def _collect_wcs_of_SB2_detections(self, IMAGE_INDEX=0, FILTER="F187N"):
         """
         Find the wcs system from the gaia matchinging
         """
-        align_fits = fits.open(self.files.file_paths_1overf_jhat[filter][IMAGE_INDEX])
+        align_fits = fits.open(self.files.file_paths_1overf_jhat[FILTER][IMAGE_INDEX])
         return wcs.WCS(align_fits["SCI", 1], align_fits)
 
     # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -374,7 +290,7 @@ class Pipeline_level_2_data:
     def starbug2_aperture_photometry_on_dither(
         self,
         IMAGE_INDEX,
-        filter,
+        FILTER,
         mode="short",
         remove_background=True,
         toggle_sb_output_txt=True,
@@ -388,13 +304,13 @@ class Pipeline_level_2_data:
             2) 'overwrite_always_run' is true
 
         """
-        cmd = self._get_cmd_unknown_sources(STARBUG2_BIN, IMAGE_INDEX, filter)
+        cmd = self._get_cmd_unknown_sources(STARBUG2_BIN, IMAGE_INDEX, FILTER)
 
         if known_sources == True:
             # Switch to the cmd for known source list
-            source_path = self._make_pos_good_sources(filter)
+            source_path = self._make_pos_good_sources(FILTER)
             cmd_known_sources = self._get_cmd_known_sources(
-                STARBUG2_BIN, source_path, filter, IMAGE_INDEX
+                STARBUG2_BIN, source_path, FILTER, IMAGE_INDEX
             )
             cmd = cmd_known_sources
 
@@ -406,10 +322,10 @@ class Pipeline_level_2_data:
         # checking for existing files
         else:
             ap_exists = Path(
-                self.files.file_paths_jhat_ap[filter][IMAGE_INDEX]
+                self.files.file_paths_jhat_ap[FILTER][IMAGE_INDEX]
             ).exists()
             bgd_exists = Path(
-                self.files.file_paths_jhat_bgd[filter][IMAGE_INDEX]
+                self.files.file_paths_jhat_bgd[FILTER][IMAGE_INDEX]
             ).exists()
 
             if ap_exists and bgd_exists:
@@ -423,7 +339,7 @@ class Pipeline_level_2_data:
     def starbug2_aperture_photometry_on_mosaic(
         self,
         mosaic_path,
-        filter,
+        FILTER,
         mode,
         toggle_sb_output_txt=True,
         N_CPUS=1,
@@ -439,8 +355,8 @@ class Pipeline_level_2_data:
         # Just let it detect with the param file (see git for jeroens catalogue thingy)
         cmd = [
             STARBUG2_BIN,
-            "-p",  # Work with own parameters files based on filter and exposure time (see jeroen)
-            self._determine_filename_sb2_param(filter, mode=mode),
+            "-p",  # Work with own parameters files based on FILTER and exposure time (see jeroen)
+            self._determine_filename_sb2_param(FILTER, mode=mode),
             "-vDA",  # v = verbose, D = detect with the parameter file!, A= aperture photometry
             mosaic_path,
              "-n", str(N_CPUS),
@@ -467,26 +383,26 @@ class Pipeline_level_2_data:
     # PSF photometrywith STARBUG2
     # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     def run_psf_on_individual_dithers(self,
-                                      filt,
+                                      FILTER,
                                       N_CPUS = 2
                                       ):
                 
-        for filter in self.files.file_paths_1overf_jhat.keys():
-            print(f"{filter}: {len(self.files.file_paths_1overf_jhat[filter])}")
-        Number_of_frames = len(self.files.file_paths_1overf_jhat[filt])
+        for FILTER in self.files.file_paths_1overf_jhat.keys():
+            print(f"{FILTER}: {len(self.files.file_paths_1overf_jhat[FILTER])}")
+        Number_of_frames = len(self.files.file_paths_1overf_jhat[FILTER])
         source_path = POSITIONS_F115W
 
         for IMAGE_INDEX in tqdm.tqdm(
                    range(Number_of_frames), desc="(A) PSF photometry"
                ): 
 
-            cal_file = self.files.file_paths_1overf_jhat[filt][IMAGE_INDEX]
-            bgdfile = self.files.file_paths_jhat_bgd[filt][IMAGE_INDEX]
+            cal_file = self.files.file_paths_1overf_jhat[FILTER][IMAGE_INDEX]
+            bgdfile = self.files.file_paths_jhat_bgd[FILTER][IMAGE_INDEX]
 
             if Path(bgdfile).exists():
                 cmd = [str(STARBUG2_BIN),
                 "-d",str(source_path),
-                "-p", self._determine_filename_sb2_param(filt, mode="long"), # for here mode doesnt matter as we have given fixed source list.
+                "-p", self._determine_filename_sb2_param(FILTER, mode="long"), # for here mode doesnt matter as we have given fixed source list.
                 "-s", "DPOS_THRESH=0.1", 
                 #"-s", "FORCE_POS=1",
                 "-n", str(N_CPUS),
@@ -496,7 +412,7 @@ class Pipeline_level_2_data:
             else:
                 cmd = [STARBUG2_BIN,
                                 "-d",source_path,
-                                "-p", self._determine_filename_sb2_param(filt, mode="long"), # for here mode doesnt matter as we have given fixed source list.
+                                "-p", self._determine_filename_sb2_param(FILTER, mode="long"), # for here mode doesnt matter as we have given fixed source list.
                                 "-s", "DPOS_THRESH=0.1", 
                                 "-n", str(N_CPUS),
                                 "-vBP", cal_file,
@@ -528,7 +444,7 @@ class Pipeline_level_2_data:
             print(prt + str(fits.open(filename)[0].header[f"{ext}"]))
         return
 
-    def _read_fits_detections(self, filename_ap, filter):
+    def _read_fits_detections(self, filename_ap, FILTER):
         """
         Collects the x and y position alongside the magnitude error of detected sources from a starbug2 aperture photometry result file.
         """
@@ -540,11 +456,11 @@ class Pipeline_level_2_data:
             d["RA"],
             d["DEC"],
             d["flag"],
-            d[filter],
-            d["e" + filter],
+            d[FILTER],
+            d["e" + FILTER],
         )
 
-    def _collect_detections_mag_limited(self, filename_ap, filter, detection_sigma=2.0):
+    def _collect_detections_mag_limited(self, filename_ap, FILTER, detection_sigma=2.0):
         """
         Provides the x and y-pixel positions of all detected sources from a starbug2 aperture file.
         Additionally outputs mask filtering which detections are below the provided maximal error in magnitude
@@ -557,7 +473,7 @@ class Pipeline_level_2_data:
             flag_sources,
             magnitude,
             magnitude_error_sources,
-        ) = self._read_fits_detections(filename_ap=filename_ap, filter=filter)
+        ) = self._read_fits_detections(filename_ap=filename_ap, FILTER=FILTER)
         detection_mask = (magnitude_error_sources <= detection_sigma) & (
             flag_sources == 0
         )
@@ -570,38 +486,38 @@ class Pipeline_level_2_data:
             magnitude[detection_mask],
         )
 
-    def _determine_filename_sb2_param(self, filter, mode="short"):
+    def _determine_filename_sb2_param(self, FILTER, mode="short"):
         """
-        Ease of use function to find SB2 param file based on filter
+        Ease of use function to find SB2 param file based on FILTER
         """
         if mode is None:
             return None
-        return str(SB_PARAM_DIR) + f"/starbug_{filter}_{mode}.param"
+        return str(SB_PARAM_DIR) + f"/starbug_{FILTER}_{mode}.param"
 
-    def _get_cmd_unknown_sources(self, starbug_path, IMAGE_INDEX, filter):
+    def _get_cmd_unknown_sources(self, starbug_path, IMAGE_INDEX, FILTER):
         return [
             starbug_path,
             "-vBD",
-            "-p",  # Work with own parameters files based on filter and exposure time (see jeroen)
-            self._determine_filename_sb2_param(filter, mode="long"),
-            self.files.file_paths_1overf_jhat[filter][IMAGE_INDEX],
+            "-p",  # Work with own parameters files based on FILTER and exposure time (see jeroen)
+            self._determine_filename_sb2_param(FILTER, mode="long"),
+            self.files.file_paths_1overf_jhat[FILTER][IMAGE_INDEX],
         ]
 
-    def _get_cmd_known_sources(self, starbug_path, source_path, filter, IMAGE_INDEX):
+    def _get_cmd_known_sources(self, starbug_path, source_path, FILTER, IMAGE_INDEX):
 
         return [
             starbug_path,
             "-d",
             source_path,
-            "-p",  # Work with own parameters files based on filter and exposure time (see jeroen)
-            self._determine_filename_sb2_param(filter, mode="long"),
+            "-p",  # Work with own parameters files based on FILTER and exposure time (see jeroen)
+            self._determine_filename_sb2_param(FILTER, mode="long"),
             "-AB",
-            self.files.file_paths_1overf_jhat[filter][IMAGE_INDEX],
+            self.files.file_paths_1overf_jhat[FILTER][IMAGE_INDEX],
         ]
 
-    def _make_pos_good_sources(self, filter):
+    def _make_pos_good_sources(self, FILTER):
         return self.Catalogue.make_source_list(
-            filt_mask_on=(filter, 2.0), outfile=str(PHOT_DIR / "test_pos.fits")
+            filt_mask_on=(FILTER, 2.0), outfile=str(PHOT_DIR / "test_pos.fits")
         )
 
     # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -611,7 +527,7 @@ class Pipeline_level_2_data:
     def _collect_image(self, filename):
         return fits.open(filename)[1].data
 
-    def plot_cal_steps_per_filter(self, IMAGE_INDEX, filter, save=False):
+    def plot_cal_steps_per_filter(self, IMAGE_INDEX, FILTER, save=False):
         out = PLOTS_DIR / "bgd_cal_steps"
         out.mkdir(parents=True, exist_ok=True)
 
@@ -622,7 +538,7 @@ class Pipeline_level_2_data:
         ax2 = fig.add_subplot(gs[0, 2])
         ax3 = fig.add_subplot(gs[0, 3])
 
-        image = self._collect_image(self.files.file_paths[filter][IMAGE_INDEX])
+        image = self._collect_image(self.files.file_paths[FILTER][IMAGE_INDEX])
 
         interval = ZScaleInterval()
         vmin, vmax = interval.get_limits(image)
@@ -630,7 +546,7 @@ class Pipeline_level_2_data:
         ax0.imshow(image, cmap="gray", vmin=vmin, vmax=vmax, origin="lower")
 
         oneoverf = self._collect_image(
-            self.files.file_paths_1overf[filter][IMAGE_INDEX]
+            self.files.file_paths_1overf[FILTER][IMAGE_INDEX]
         )
 
         # ax1.imshow(oneoverf, cmap="gray", vmin=vmin, vmax=vmax, origin="lower")
@@ -639,7 +555,7 @@ class Pipeline_level_2_data:
         cmap.set_bad("red", 1.0)
         ax1.imshow(masked_array, cmap=cmap, vmin=vmin, vmax=vmax, origin="lower")
 
-        bgd = self._collect_image(self.files.file_paths_jhat_bgd[filter][IMAGE_INDEX])
+        bgd = self._collect_image(self.files.file_paths_jhat_bgd[FILTER][IMAGE_INDEX])
         ax2.imshow(image, cmap="gray", vmin=vmin, vmax=vmax, origin="lower")
 
         oneoverf_sub_bgd = oneoverf - bgd
@@ -654,14 +570,132 @@ class Pipeline_level_2_data:
         for ax in [ax0, ax1, ax2, ax3]:
             ax.set_yticklabels([])
             ax.set_xticklabels([])
-        fig.suptitle(filter, fontsize=fontsize + 10)
+        fig.suptitle(FILTER, fontsize=fontsize + 10)
         pwd = os.getcwd()
         if save == True:
             plt.savefig(
-                f"Plots/bgd_cal_steps/I_{IMAGE_INDEX}_{filter}.pdf", bbox_inches="tight"
+                f"Plots/bgd_cal_steps/I_{IMAGE_INDEX}_{FILTER}.pdf", bbox_inches="tight"
             )
         plt.show()
 
+    def Run_AP_on_individual_lvl2_dither(
+        self,
+        IMAGE_INDEX=28,
+        detection_sigma=2.0,
+        overwrite_dic={
+            "1/f": False,
+            "Jhat calibration": False,
+            "SB2": False,
+        },
+        save_cal_step_plot=False,
+        known_sources=False,
+    ):
+        self.aperture_data = {}
+        self.wcs_align = {}
+        self.pixel_coord_sources = {}
+        self.world_coord_sources = {}
+        self.magnitudes = {}
+
+        filt1 = "F115W"
+
+        for FILTER in [filt1]:
+            print(f"Initializing for {FILTER}...")
+            if (
+                Path(self.files.file_paths_1overf[FILTER][IMAGE_INDEX]).exists() == False
+                or overwrite_dic["1/f"] == True
+            ):
+                print(f"    (1) Calibrating 1/f")
+                self.calibrate_one_over_f(IMAGE_INDEX, FILTER)
+            else:
+                print(f"    (SKIPPED) Calibrating 1/f            -- Using previous run")
+            if (
+                Path(self.files.file_paths_1overf_jhat[FILTER][IMAGE_INDEX]).exists() == False
+                or overwrite_dic["Jhat calibration"] == True
+            ):
+                print(f"    (2) Aligning with gaia catalog")
+                self.assign_WCS_from_gaia_dr3(IMAGE_INDEX=IMAGE_INDEX, FILTER=FILTER)
+            else:
+                print(f"    (SKIPPED) Aligning with gaia catalog -- Using previous run")
+
+            self.starbug2_aperture_photometry_on_dither(
+                IMAGE_INDEX=IMAGE_INDEX,
+                FILTER=FILTER,
+                remove_background=True,
+                toggle_sb_output_txt=True,
+                overwrite_always_run=overwrite_dic["SB2"],
+                known_sources=known_sources,
+            )
+
+            self.aperture_data[FILTER] = fits.open(
+                self.files.file_paths_jhat_ap[FILTER][IMAGE_INDEX]
+            )[1].data
+
+            # Use the gaia wcs of the image
+            self.wcs_align[FILTER] = self._collect_wcs_of_SB2_detections(
+                IMAGE_INDEX=IMAGE_INDEX,
+                FILTER=FILTER,
+            )
+            # Pixel coordinates of detected sources
+            (
+                self.pixel_coord_sources[FILTER],
+                self.world_coord_sources[FILTER],
+                self.magnitudes[FILTER],
+            ) = self._collect_detections_mag_limited(
+                filename_ap=self.files.file_paths_jhat_ap[FILTER][IMAGE_INDEX],
+                FILTER=FILTER,
+                detection_sigma=detection_sigma,
+            )
+
+            # always plot, just the save!
+            self.plot_cal_steps_per_filter(
+                IMAGE_INDEX=IMAGE_INDEX, FILTER=FILTER, save=save_cal_step_plot
+            )
+
+        print("----Pipeline Versions-----")
+        self.find_calibration_versions(
+            self.files.file_paths_1overf_jhat[FILTER][IMAGE_INDEX]
+        )
+        print("--------Completed--------")
+        return
+
+    def Load_AP_on_individual_lvl2_dither(
+        self, IMAGE_INDEXS=[28, 29], filts=["F115W"], detection_sigma=2.0
+    ):
+        self.aperture_data = {}
+        self.wcs_align = {}
+        self.pixel_coord_sources = {}
+        self.world_coord_sources = {}
+        self.magnitudes = {}
+
+        for FILTER in filts:
+            self.aperture_data[FILTER] = {}
+            self.wcs_align[FILTER] = {}
+            self.pixel_coord_sources[FILTER] = {}
+            self.world_coord_sources[FILTER] = {}
+            self.magnitudes[FILTER] = {}
+
+            for IMAGE_INDEX in IMAGE_INDEXS:
+
+                self.aperture_data[FILTER][IMAGE_INDEX] = fits.open(
+                    self.files.file_paths_jhat_ap[FILTER][IMAGE_INDEX]
+                )[1].data
+
+                # Use the gaia wcs of the image
+                self.wcs_align[FILTER][IMAGE_INDEX] = self._collect_wcs_of_SB2_detections(
+                    IMAGE_INDEX=IMAGE_INDEX,
+                    FILTER=FILTER,
+                )
+                # Pixel coordinates of detected sources
+                (
+                    self.pixel_coord_sources[FILTER][IMAGE_INDEX],
+                    self.world_coord_sources[FILTER][IMAGE_INDEX],
+                    self.magnitudes[FILTER][IMAGE_INDEX],
+                ) = self._collect_detections_mag_limited(
+                    filename_ap=self.files.file_paths_jhat_ap[FILTER][IMAGE_INDEX],
+                    FILTER=FILTER,
+                    detection_sigma=detection_sigma,
+                )
+        return
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # File organisation
@@ -669,14 +703,14 @@ class Pipeline_level_2_data:
 class File_Finder:
     """
     Finds calibrated (_cal.fits) files under a working directory and
-    splits them by each unique filter, read from the FITS header FILTER keyword.
+    splits them by each unique FILTER, read from the FITS header FILTER keyword.
     """
 
     def __init__(self, wdir, filter_patterns=None):
         """
         wdir: directory containing one subfolder per exposure
               (e.g. mastDownload/JWST)
-        filter_patterns: optional dict mapping filter name -> list of
+        filter_patterns: optional dict mapping FILTER name -> list of
               folder-name substrings, used only as a fallback if a
               file's header can't be read.
         """
@@ -686,7 +720,7 @@ class File_Finder:
 
     def _filter_from_header(self, cal_path):
         """
-        Obtain the filter in a given .fits file if possible
+        Obtain the FILTER in a given .fits file if possible
         """
         try:
             return fits.getval(cal_path, "FILTER", ext=0)
@@ -720,7 +754,7 @@ class File_Finder:
 
     def find_calibrated_filenames(self):
         """
-        Read the directory for all files. read the filter from the fits file and store appropriately per filter.
+        Read the directory for all files. read the FILTER from the fits file and store appropriately per FILTER.
         """
 
         self.current_filters = []
@@ -729,15 +763,15 @@ class File_Finder:
             if not cal_path.exists():
                 continue
 
-            filt = self._filter_from_header(cal_path)
-            if filt not in self.current_filters:
-                self.current_filters.append(filt)
+            FILTER = self._filter_from_header(cal_path)
+            if FILTER not in self.current_filters:
+                self.current_filters.append(FILTER)
 
-            if filt is None:
+            if FILTER is None:
                 self.unmatched.append(str(cal_path))
                 continue
 
-            self.file_paths.setdefault(filt, []).append(str(cal_path))
+            self.file_paths.setdefault(FILTER, []).append(str(cal_path))
 
         # All the seperate names/files we will need in our pipeline above
         for mode, attr in [
@@ -759,9 +793,10 @@ class File_Finder:
             )
 
         if self.unmatched:
-            print(f"Warning: {len(self.unmatched)} files had no resolvable filter")
+            print(f"Warning: {len(self.unmatched)} files had no resolvable FILTER")
 
         return
+    
 
 
 # ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= =======
