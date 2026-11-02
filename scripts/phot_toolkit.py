@@ -225,7 +225,7 @@ def merge_catalogues(long_file, short_file, out_file, match_arcsec=0.06, max_err
                 filt = found[0]
         
         t = Table.read(f, hdu=1)
-        mask = np.isfinite(err) & (t[f"e{filt}"] < max_err)
+        mask = (t[f"e{filt}"] < max_err)
         return t[mask]
 
     deep, shallow = load(long_file), load(short_file)
