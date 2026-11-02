@@ -17,34 +17,32 @@ def parse_args() -> argparse.Namespace:
         required=True,
         help="JWST filter, e.g. F115W F187N, F335M, F277W, F200W, F444W, F182M, F430M, F090W, F356W, F150W, F480M, F212N",
     )
-    parser.add_argument("--WHT_split", required=True, help="WHT weight to split filter on!")
     parser.add_argument("--ncpu", required=True, help="Number of cpu cores")
     return parser.parse_args()
 
 working_directory = f"{LEVEL2_DIR}/mastDownload/JWST"
 PHOTOMETRIC_pipeline = PPL.Pipeline_level_2_data(working_directory=working_directory)
 
-all_filters = [
-    "F090W",
-    "F115W",
-    "F150W",
-    "F182M",
-    "F187N",
-    "F200W",
-    "F212N",
-    "F277W",
-    "F335M",
-    "F356W",
-    "F430M",
-    "F444W",
-    "F480M",
-]
+all_filters = {
+    "F090W": '?',
+    "F115W": 200,
+    "F150W": '?',
+    "F182M": '?',
+    "F187N": 100,
+    "F200W": 200,
+    "F212N": '?',
+    "F277W": '?',
+    "F335M": '?',
+    "F356W": '?',
+    "F430M": '?',
+    "F444W": 100,
+    "F480M": '?',
+}
 
 def main() -> None:
     args = parse_args()
     FILTER = str(args.filter)
     ncpu = args.ncpu
-    wht_threshold = args.WHT_split
 
     def _complete_run(FILTER):
 
@@ -61,12 +59,13 @@ def main() -> None:
                             },
                             output_dir=LEVEL3_DIR)
         
-        Mosiac_ap_path = PHOTOMETRIC_pipeline.Compute_Aperture_Photometry_Mosaic( FILTER= FILTER, wht_threshold = wht_threshold, ncpu = ncpu)
+        # Mosiac_ap_path = PHOTOMETRIC_pipeline.Compute_Aperture_Photometry_Mosaic( FILTER= FILTER, wht_threshold = all_filters[FILTER], ncpu = ncpu)
         print(f'Finished aperture photometry for {FILTER}')
-        return Mosiac_ap_path
+        # return Mosiac_ap_path
+        return
         
-    if FILTER is 'ALL':
-        for FILTER_ in all_filters:
+    if FILTER == 'ALL':
+        for FILTER_ in all_filters.keys():
             _complete_run(FILTER= FILTER_)
     
     else:

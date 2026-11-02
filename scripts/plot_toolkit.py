@@ -21,7 +21,17 @@ from astropy.visualization import (
 )
 from astropy.wcs.utils import proj_plane_pixel_scales
 from photutils.aperture import CircularAperture
-
+from Config import (
+    CATALOGUE_JEROEN,
+    POSITIONS_F115W,
+    GAIA_CATALOGUE,
+    MPLSTYLE,
+    SB_PARAM_DIR,
+    PHOT_DIR,
+    PLOTS_DIR,
+    LEVEL3_DIR,
+    STARBUG2_BIN,
+)
 
 def _make_mag_name(filter):
     return rf"$m_{{\mathrm{{{str(filter)}}}}}$"
@@ -278,9 +288,8 @@ def load_split_image_color(filt, target, shape_out, mode="long"):
     """
     Reproject single mosaic into grid
     """
-    level3_data_path = "/net/vdesk/data2/slagter/JWST_NIRCAM_#1227_level_3/"
     with fits.open(
-        level3_data_path + f"mosaic_{filt}_{mode}_exposure.fits", memmap=True
+        str(LEVEL3_DIR) + f"/mosaic_{filt}_{mode}_exposure.fits", memmap=True
     ) as hdu:
         data = hdu["SCI"].data
         w = WCS(hdu["SCI"].header, hdu)
@@ -321,7 +330,7 @@ def plot_mosaic_split(
     ax.coords["ra"].set_axislabel("RA")
     ax.coords["dec"].set_axislabel("Dec")
     ax.grid(color="w", alpha=0.3)
-    plt.savefig(f"Plots/Mosaic_{filter}_final.pdf", bbox_inches="tight")
+    plt.savefig(f"../../Plots/Mosaic_{filter}_final.pdf", bbox_inches="tight")
     return
 
 

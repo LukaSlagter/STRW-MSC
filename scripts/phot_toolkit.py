@@ -162,7 +162,7 @@ def in_wcs_mask(ra, dec, wcs, shape):
 
 def Split_Mosaic_on_WHT(FILTER='F115W', wht_threshold=200.0
 ):
-    mosaic_path=str(LEVEL3_DIR) + f"mosaic_{FILTER}_final_i2d.fits"
+    mosaic_path=str(LEVEL3_DIR) + f"/mosaic_{FILTER}_final_i2d.fits"
     hdu = fits.open(mosaic_path)
 
     # Build masks & Apply
@@ -215,11 +215,18 @@ def Split_Mosaic_on_WHT(FILTER='F115W', wht_threshold=200.0
     print("----Completed-Splitting-Mosaic----")
     return
 
-
-def merge_catalogues(long_file, short_file, out_file, match_arcsec=0.06):
+import re
+def merge_catalogues(long_file, short_file, out_file, match_arcsec=0.06, max_err=2.0):
     def load(f):
+
+        found = [m.group(1) for c in t.colnames if (m := re.fullmatch(r"e(F\d{3}[WMN])", c))]
+        if filt is None:
+            if len(found) == 1:
+                filt = found[0]
+        
         t = Table.read(f, hdu=1)
-        return t
+        mask = np.isfinite(err) & (t[f"e{filt}"] < max_err)
+        return t[mask]
 
     deep, shallow = load(long_file), load(short_file)
 

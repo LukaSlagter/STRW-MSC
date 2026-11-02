@@ -152,18 +152,21 @@ class Pipeline_level_2_data:
         PTK.Split_Mosaic_on_WHT(FILTER=FILTER, wht_threshold = int(wht_threshold))
 
         for mode in ['short','long']:
+            mosaic_ap_path = str(LEVEL3_DIR) + f"/mosaic_{FILTER}_{mode}_exposure-ap.fits"
             mosaic_path = str(LEVEL3_DIR) + f"/mosaic_{FILTER}_{mode}_exposure.fits"
-            print(f"Will run Starbug2 on {mosaic_path}")
-            if Path(mosaic_path).exists():
-                self.starbug2_aperture_photometry_on_mosaic(
-                    mosaic_path=mosaic_path,
-                    filter=FILTER,
-                    mode=mode,
-                    toggle_sb_output_txt=True,
-                    N_CPUS=ncpu,
-                )
+            if Path(mosaic_ap_path).exists():
+                print('Loading previous results!')
             else:
-                print(f"Path doesn't exist: {mosaic_path}")
+                if Path(mosaic_path).exists():
+                    self.starbug2_aperture_photometry_on_mosaic(
+                        mosaic_path=mosaic_path,
+                        FILTER=FILTER,
+                        mode=mode,
+                        toggle_sb_output_txt=True,
+                        N_CPUS=ncpu,
+                    )
+                else:
+                    print(f"Path doesn't exist: {mosaic_path}")
 
         out_file  = str(LEVEL3_DIR)   + f"/mosaic_{FILTER}_merged_exposure-ap.fits"
         PTK.merge_catalogues(long_file = str(LEVEL3_DIR) + f"/mosaic_{FILTER}_long_exposure-ap.fits",
@@ -382,44 +385,27 @@ class Pipeline_level_2_data:
     # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     # PSF photometrywith STARBUG2
     # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-    def run_psf_on_individual_dithers(self,
-                                      FILTER,
-                                      N_CPUS = 2
-                                      ):
-                
-        for FILTER in self.files.file_paths_1overf_jhat.keys():
-            print(f"{FILTER}: {len(self.files.file_paths_1overf_jhat[FILTER])}")
-        Number_of_frames = len(self.files.file_paths_1overf_jhat[FILTER])
-        source_path = POSITIONS_F115W
+    def run_psf_on_individual_dithers(self, FILTER, N_CPUS=2, files_per_core=4):
+        N_CPUS = int(N_CPUS)                      # argparse gives a string
 
-        for IMAGE_INDEX in tqdm.tqdm(
-                   range(Number_of_frames), desc="(A) PSF photometry"
-               ): 
+        cal_files = [str(f) for f in self.files.file_paths_1overf_jhat[FILTER]]
+        print(f"{FILTER}: {len(cal_files)} files, {N_CPUS} cores")
 
-            cal_file = self.files.file_paths_1overf_jhat[FILTER][IMAGE_INDEX]
-            bgdfile = self.files.file_paths_jhat_bgd[FILTER][IMAGE_INDEX]
+        # Load the aperture mosaic detections!
+        source_path = str(LEVEL3_DIR)   + f"/mosaic_{FILTER}_merged_exposure-ap.fits"
+        # each SB2 run gets N_CPUS * files per core files --> optimized for many cores :)
+        # Each batch does need to load the overhad of SB@ like the psf models etc. but is << than the psf fitting!
+        batch = N_CPUS * files_per_core
+        batches = [cal_files[i:i + batch] for i in range(0, len(cal_files), batch)]
 
-            if Path(bgdfile).exists():
-                cmd = [str(STARBUG2_BIN),
-                "-d",str(source_path),
-                "-p", self._determine_filename_sb2_param(FILTER, mode="long"), # for here mode doesnt matter as we have given fixed source list.
-                "-s", "DPOS_THRESH=0.1", 
-                #"-s", "FORCE_POS=1",
+        for files in tqdm.tqdm(batches, desc=f"(A) PSF photometry {FILTER}"):
+            cmd = [str(STARBUG2_BIN),
+                "-d", str(source_path),
+                "-p", self._determine_filename_sb2_param(FILTER, mode="long"),
+                "-s", "DPOS_THRESH=0.1",
                 "-n", str(N_CPUS),
-                '-b', bgdfile,
-                "-vP", cal_file,
-                ]
-            else:
-                cmd = [STARBUG2_BIN,
-                                "-d",source_path,
-                                "-p", self._determine_filename_sb2_param(FILTER, mode="long"), # for here mode doesnt matter as we have given fixed source list.
-                                "-s", "DPOS_THRESH=0.1", 
-                                "-n", str(N_CPUS),
-                                "-vBP", cal_file,
-                                ]
-
-
-            self._run_starbug2(cmd, toggle_sb_output_txt=True) # set to false as so many to run!
+                "-vBP", *files]               # Background estimated per image
+            self._run_starbug2(cmd, toggle_sb_output_txt=True)
         return
 
 
