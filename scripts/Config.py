@@ -21,4 +21,6 @@ MPLSTYLE = SCRATCH / "stylish.mplstyle"
 
 LEVEL2_DIR = str(DATA_ROOT / "JWST_NIRCAM_#1227_level_2")
 LEVEL3_DIR = str(DATA_ROOT / "JWST_NIRCAM_#1227_level_3")
-STARBUG2_BIN = "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/STARBUG2_venv/bin/starbug2"
+STARBUG2_BIN = (
+    "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/STARBUG2_venv/bin/starbug2"
+)

@@ -33,6 +33,7 @@ from Config import (
     STARBUG2_BIN,
 )
 
+
 def _make_mag_name(filter):
     return rf"$m_{{\mathrm{{{str(filter)}}}}}$"
 

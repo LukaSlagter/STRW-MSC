@@ -15,6 +15,7 @@ from Config import (
     LEVEL3_DIR,
 )
 
+
 # ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= =======
 # Reading Jeroens catalogue + masking region
 # ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= =======
@@ -159,10 +160,8 @@ def in_wcs_mask(ra, dec, wcs, shape):
     return mask
 
 
-
-def Split_Mosaic_on_WHT(FILTER='F115W', wht_threshold=200.0
-):
-    mosaic_path=str(LEVEL3_DIR) + f"/mosaic_{FILTER}_final_i2d.fits"
+def Split_Mosaic_on_WHT(FILTER="F115W", wht_threshold=200.0):
+    mosaic_path = str(LEVEL3_DIR) + f"/mosaic_{FILTER}_final_i2d.fits"
     hdu = fits.open(mosaic_path)
 
     # Build masks & Apply
@@ -197,7 +196,7 @@ def Split_Mosaic_on_WHT(FILTER='F115W', wht_threshold=200.0
                 name=fit_frame,
             )
         )
-    print('happy')
+    print("happy")
 
     hdu_out = fits.HDUList([fits.PrimaryHDU(header=hdu[0].header)] + long_exposure_data)
     hdu_out.writeto(
@@ -215,18 +214,23 @@ def Split_Mosaic_on_WHT(FILTER='F115W', wht_threshold=200.0
     print("----Completed-Splitting-Mosaic----")
     return
 
+
 import re
 from astropy.table import Table, vstack
-def merge_catalogues(long_file, short_file, out_file, match_arcsec=0.06, max_err=2.0):
+
+
+def merge_long_short(long_file, short_file, out_file, match_arcsec=0.06, max_err=2.0):
     def load(f):
         t = Table.read(f, hdu=1)
-        found = [m.group(1) for c in t.colnames if (m := re.fullmatch(r"e(F\d{3}[WMN])", c))]
+        found = [
+            m.group(1) for c in t.colnames if (m := re.fullmatch(r"e(F\d{3}[WMN])", c))
+        ]
         if len(found) == 1:
             filt = found[0]
         else:
-            filt= None
-        
-        mask = (t[f"e{filt}"] < max_err)
+            filt = None
+
+        mask = t[f"e{filt}"] < max_err
         return t[mask]
 
     deep, shallow = load(long_file), load(short_file)
@@ -240,6 +244,8 @@ def merge_catalogues(long_file, short_file, out_file, match_arcsec=0.06, max_err
     merged = vstack([deep, shallow[keep]], join_type="outer")
     merged.write(out_file, overwrite=True)
 
-    print(f"deep: {len(deep)}, shallow: {len(shallow)}, "
-          f"duplicates dropped: {(~keep).sum()}, merged: {len(merged)}")
+    print(
+        f"deep: {len(deep)}, shallow: {len(shallow)}, "
+        f"duplicates dropped: {(~keep).sum()}, merged: {len(merged)}"
+    )
     return merged

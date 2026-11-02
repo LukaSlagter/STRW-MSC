@@ -27,6 +27,7 @@ from Config import (
 if MPLSTYLE.exists():
     plt.style.use(str(MPLSTYLE))
 
+
 # ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= =======
 # Data reduction pipeline for level 2 data, single dither or full mosaic
 # ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= =======
@@ -34,6 +35,7 @@ class Pipeline_level_2_data:
     """
     Helper class build around the in/output of starbug2
     """
+
     def __init__(self, working_directory=""):
         self.wdir = working_directory
         self.files = File_Finder(self.wdir)
@@ -54,7 +56,6 @@ class Pipeline_level_2_data:
             "1/f": False,
             "Jhat calibration": False,
         },
-       
     ):  # standard level 3 output directory for all frames!
         print(f"----Initializing dither calibration for {FILTER}---------")
         Number_of_frames = len(self.files.file_paths_1overf[FILTER])
@@ -65,7 +66,8 @@ class Pipeline_level_2_data:
             range(Number_of_frames), desc="(1) Calibrating 1/f"
         ):  #
             if (
-                Path(self.files.file_paths_1overf[FILTER][IMAGE_INDEX]).exists() == False
+                Path(self.files.file_paths_1overf[FILTER][IMAGE_INDEX]).exists()
+                == False
                 or overwrite_dic["1/f"] == True
             ):
                 self.calibrate_one_over_f(IMAGE_INDEX, FILTER)
@@ -75,20 +77,23 @@ class Pipeline_level_2_data:
             range(Number_of_frames), desc="(2) Aligning with gaia catalog"
         ):
             if (
-                Path(self.files.file_paths_1overf_jhat[FILTER][IMAGE_INDEX]).exists() == False
+                Path(self.files.file_paths_1overf_jhat[FILTER][IMAGE_INDEX]).exists()
+                == False
                 or overwrite_dic["Jhat calibration"] == True
             ):
                 self.assign_WCS_from_gaia_dr3(IMAGE_INDEX=IMAGE_INDEX, FILTER=FILTER)
         return
 
-    def Create_Mosaic(self,
-                      FILTER="",
-                        overwrite_dic={
-                            "Association file": False,
-                            "Image3Pipeline file": False,
-                        },
-                        output_dir=LEVEL3_DIR):
-        
+    def Create_Mosaic(
+        self,
+        FILTER="",
+        overwrite_dic={
+            "Association file": False,
+            "Image3Pipeline file": False,
+        },
+        output_dir=LEVEL3_DIR,
+    ):
+
         print(f"----Initializing mosaicing for {FILTER}---------")
         os.environ["CRDS_PATH"] = os.path.expanduser("~/crds_cache")
         os.environ["CRDS_CONTEXT"] = "jwst_1584.pmap"
@@ -106,8 +111,9 @@ class Pipeline_level_2_data:
 
         # Now we have filled each folder with its 1/f calibrated fits file with its WCS attached
         print("(3) Creating association file")
-        output_dir = Path(output_dir); output_dir.mkdir(parents=True, exist_ok=True)
-        asn_file = association_path  
+        output_dir = Path(output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+        asn_file = association_path
 
         if (Path(association_path).exists() == False) or (
             overwrite_dic["Association file"] == True
@@ -142,20 +148,22 @@ class Pipeline_level_2_data:
         print("----Completed----")
         return
 
-    def Compute_Aperture_Photometry_Mosaic(self, FILTER, wht_threshold, ncpu = 2):
+    def Compute_Aperture_Photometry_Mosaic(self, FILTER, wht_threshold, ncpu=2):
         """
         Run starbug2 aperture source detection and photometry on final mosaic.
-        Consider the selection parameters based on the WHT extension, splitting the deep/long exposed region 
+        Consider the selection parameters based on the WHT extension, splitting the deep/long exposed region
         and the shallow/shorter exposed. Final catalgoue is merged with detection of overlapping sources
         """
         # Create binary distinction for based on the WHT_threshold!
-        PTK.Split_Mosaic_on_WHT(FILTER=FILTER, wht_threshold = int(wht_threshold))
+        PTK.Split_Mosaic_on_WHT(FILTER=FILTER, wht_threshold=int(wht_threshold))
 
-        for mode in ['short','long']:
-            mosaic_ap_path = str(LEVEL3_DIR) + f"/mosaic_{FILTER}_{mode}_exposure-ap.fits"
+        for mode in ["short", "long"]:
+            mosaic_ap_path = (
+                str(LEVEL3_DIR) + f"/mosaic_{FILTER}_{mode}_exposure-ap.fits"
+            )
             mosaic_path = str(LEVEL3_DIR) + f"/mosaic_{FILTER}_{mode}_exposure.fits"
             if Path(mosaic_ap_path).exists():
-                print('Loading previous results!')
+                print("Loading previous results!")
             else:
                 if Path(mosaic_path).exists():
                     self.starbug2_aperture_photometry_on_mosaic(
@@ -168,15 +176,31 @@ class Pipeline_level_2_data:
                 else:
                     print(f"Path doesn't exist: {mosaic_path}")
 
-        out_file  = str(LEVEL3_DIR)   + f"/mosaic_{FILTER}_merged_exposure-ap.fits"
-        PTK.merge_catalogues(long_file = str(LEVEL3_DIR) + f"/mosaic_{FILTER}_long_exposure-ap.fits",
-                            short_file = str(LEVEL3_DIR) + f"/mosaic_{FILTER}_short_exposure-ap.fits", 
-                            out_file  = out_file, 
-                            match_arcsec=0.06)
+        out_file = str(LEVEL3_DIR) + f"/mosaic_{FILTER}_merged_exposure-ap.fits"
+        PTK.merge_long_short(
+            long_file=str(LEVEL3_DIR) + f"/mosaic_{FILTER}_long_exposure-ap.fits",
+            short_file=str(LEVEL3_DIR) + f"/mosaic_{FILTER}_short_exposure-ap.fits",
+            out_file=out_file,
+            match_arcsec=0.06,
+        )
 
         return out_file
 
+    def Compose_PSF_weighted_catalogue(self, FILTER):
+        # Loading all psf fit files
+        cal_files = [str(f) for f in self.files.file_paths_jhat_psf[FILTER]]
 
+        # Output filename
+        outfile = (
+            str(LEVEL3_DIR) + f"/GENERIC_MATCHED_PSF_weighted_catalogue_{FILTER}.fits"
+        )
+
+        # Generic matching using starbug2
+        cmd = [str(STARBUG2_BIN), "-vGfo", outfile, *cal_files]
+        self._run_starbug2(cmd, toggle_sb_output_txt=True)
+
+        print("---Completed-Generic-Catalogue-Matching----")
+        return
 
     # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     # 1/f calibration
@@ -362,7 +386,8 @@ class Pipeline_level_2_data:
             self._determine_filename_sb2_param(FILTER, mode=mode),
             "-vDA",  # v = verbose, D = detect with the parameter file!, A= aperture photometry
             mosaic_path,
-             "-n", str(N_CPUS),
+            "-n",
+            str(N_CPUS),
         ]
 
         self._run_starbug2(cmd, toggle_sb_output_txt)
@@ -382,32 +407,39 @@ class Pipeline_level_2_data:
         result.check_returncode()
 
         return
+
     # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     # PSF photometrywith STARBUG2
     # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     def run_psf_on_individual_dithers(self, FILTER, N_CPUS=2, files_per_core=4):
-        N_CPUS = int(N_CPUS)                      # argparse gives a string
+        N_CPUS = int(N_CPUS)  # argparse gives a string
 
         cal_files = [str(f) for f in self.files.file_paths_1overf_jhat[FILTER]]
         print(f"{FILTER}: {len(cal_files)} files, {N_CPUS} cores")
 
         # Load the aperture mosaic detections!
-        source_path = str(LEVEL3_DIR)   + f"/mosaic_{FILTER}_merged_exposure-ap.fits"
+        source_path = str(LEVEL3_DIR) + f"/mosaic_{FILTER}_merged_exposure-ap.fits"
         # each SB2 run gets N_CPUS * files per core files --> optimized for many cores :)
         # Each batch does need to load the overhad of SB@ like the psf models etc. but is << than the psf fitting!
         batch = N_CPUS * files_per_core
-        batches = [cal_files[i:i + batch] for i in range(0, len(cal_files), batch)]
+        batches = [cal_files[i : i + batch] for i in range(0, len(cal_files), batch)]
 
         for files in tqdm.tqdm(batches, desc=f"(A) PSF photometry {FILTER}"):
-            cmd = [str(STARBUG2_BIN),
-                "-d", str(source_path),
-                "-p", self._determine_filename_sb2_param(FILTER, mode="long"),
-                "-s", "DPOS_THRESH=0.1",
-                "-n", str(N_CPUS),
-                "-vBP", *files]               # Background estimated per image
+            cmd = [
+                str(STARBUG2_BIN),
+                "-d",
+                str(source_path),
+                "-p",
+                self._determine_filename_sb2_param(FILTER, mode="long"),
+                "-s",
+                "DPOS_THRESH=0.1",
+                "-n",
+                str(N_CPUS),
+                "-vBP",
+                *files,
+            ]  # Background estimated per image
             self._run_starbug2(cmd, toggle_sb_output_txt=True)
         return
-
 
     # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     # Management functions
@@ -587,7 +619,8 @@ class Pipeline_level_2_data:
         for FILTER in [filt1]:
             print(f"Initializing for {FILTER}...")
             if (
-                Path(self.files.file_paths_1overf[FILTER][IMAGE_INDEX]).exists() == False
+                Path(self.files.file_paths_1overf[FILTER][IMAGE_INDEX]).exists()
+                == False
                 or overwrite_dic["1/f"] == True
             ):
                 print(f"    (1) Calibrating 1/f")
@@ -595,7 +628,8 @@ class Pipeline_level_2_data:
             else:
                 print(f"    (SKIPPED) Calibrating 1/f            -- Using previous run")
             if (
-                Path(self.files.file_paths_1overf_jhat[FILTER][IMAGE_INDEX]).exists() == False
+                Path(self.files.file_paths_1overf_jhat[FILTER][IMAGE_INDEX]).exists()
+                == False
                 or overwrite_dic["Jhat calibration"] == True
             ):
                 print(f"    (2) Aligning with gaia catalog")
@@ -667,9 +701,11 @@ class Pipeline_level_2_data:
                 )[1].data
 
                 # Use the gaia wcs of the image
-                self.wcs_align[FILTER][IMAGE_INDEX] = self._collect_wcs_of_SB2_detections(
-                    IMAGE_INDEX=IMAGE_INDEX,
-                    FILTER=FILTER,
+                self.wcs_align[FILTER][IMAGE_INDEX] = (
+                    self._collect_wcs_of_SB2_detections(
+                        IMAGE_INDEX=IMAGE_INDEX,
+                        FILTER=FILTER,
+                    )
                 )
                 # Pixel coordinates of detected sources
                 (
@@ -682,6 +718,7 @@ class Pipeline_level_2_data:
                     detection_sigma=detection_sigma,
                 )
         return
+
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # File organisation
@@ -767,7 +804,7 @@ class File_Finder:
             ("jhat", "file_paths_1overf_jhat"),
             ("jhat_ap", "file_paths_jhat_ap"),
             ("jhat_bg", "file_paths_jhat_bgd"),
-            ("jhat_psf", "file_paths_jhat_psf")
+            ("jhat_psf", "file_paths_jhat_psf"),
         ]:
             setattr(
                 self,
@@ -782,7 +819,6 @@ class File_Finder:
             print(f"Warning: {len(self.unmatched)} files had no resolvable FILTER")
 
         return
-    
 
 
 # ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= =======

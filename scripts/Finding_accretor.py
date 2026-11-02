@@ -36,7 +36,6 @@ working_directory = f"{LEVEL2_DIR}/mastDownload/JWST"
 PHOTOMETRIC_pipeline = PPL.Pipeline_level_2_data(working_directory=working_directory)
 
 
-
 class Accretion_Finder:
     def __init__(self, photometry_data, max_mag_err, C1_name, C2_name, C3_name):
         names = (C1_name, C2_name, C3_name)
@@ -49,12 +48,14 @@ class Accretion_Finder:
         self.photometry_data = photometry_data[sigma_3 < max_mag_err]
 
         # Sort data based on the C1-C3 color (Required for running median)
-        self.sorting_sequence = np.argsort((self.photometry_data[C1_name]-self.photometry_data[C3_name]))
+        self.sorting_sequence = np.argsort(
+            (self.photometry_data[C1_name] - self.photometry_data[C3_name])
+        )
         self.photometry_data = self.photometry_data[self.sorting_sequence]
 
         # Read the colors, sorted based on C1-C3
         self.C1, self.C2, self.C3 = (self.photometry_data[n] for n in names)
-        self.eC1, self.eC2, self.eC3 = (self.photometry_data["e" + n] for n in names)        
+        self.eC1, self.eC2, self.eC3 = (self.photometry_data["e" + n] for n in names)
         self.C1_C2_color = self.C1 - self.C2
         self.C1_C3_color = self.C1 - self.C3
 
@@ -64,14 +65,13 @@ class Accretion_Finder:
         self.C1_C2_eMag = np.hypot(self.eC1, self.eC2)
         self.C1_C3_eMag = np.hypot(self.eC1, self.eC3)
         return
-    
-    
+
     def Set_template_Guido_2010(self):
         self.Select_CC_outliers(min_mag_diff=0.1, nsigma=4)
         self.Compute_rolling_median(window_size=100)
         return
-    
-    def Compute_rolling_median(self, window_size = 1):
+
+    def Compute_rolling_median(self, window_size=1):
         """
         example:
         s = pd.Series([0, 1, 2, 3, 4])
@@ -82,10 +82,10 @@ class Accretion_Finder:
         3    3.0
         4    3.5
         dtype: float64
-        
+
         """
         window_size = window_size
-    
+
         # Compute the rolling median
         # Center = True ensures the median computes is for the index we are at
         # min_periods sets the first [0, 1, ..., window_size/2] values to nan
@@ -96,7 +96,7 @@ class Accretion_Finder:
             .to_numpy()
         )
         return
-    
+
     def Select_CC_outliers(self, min_mag_diff, nsigma=4):
         """
         Excess if the C1-C2 colour exceeds the template by
@@ -106,7 +106,7 @@ class Accretion_Finder:
         """
         diff = self.C1_C2_color - self.template_C1_C2
         self.excess_mask = (diff > nsigma * self.C1_C2_eMag) & (diff > min_mag_diff)
-        print(f"Found {np.sum(self.excess_mask)} out of {len(self.excess_mask)} excess sources")
+        print(
+            f"Found {np.sum(self.excess_mask)} out of {len(self.excess_mask)} excess sources"
+        )
         return
-
-
