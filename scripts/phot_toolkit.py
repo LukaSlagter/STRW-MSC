@@ -216,15 +216,16 @@ def Split_Mosaic_on_WHT(FILTER='F115W', wht_threshold=200.0
     return
 
 import re
+from astropy.table import Table, vstack
 def merge_catalogues(long_file, short_file, out_file, match_arcsec=0.06, max_err=2.0):
     def load(f):
-
-        found = [m.group(1) for c in t.colnames if (m := re.fullmatch(r"e(F\d{3}[WMN])", c))]
-        if filt is None:
-            if len(found) == 1:
-                filt = found[0]
-        
         t = Table.read(f, hdu=1)
+        found = [m.group(1) for c in t.colnames if (m := re.fullmatch(r"e(F\d{3}[WMN])", c))]
+        if len(found) == 1:
+            filt = found[0]
+        else:
+            filt= None
+        
         mask = (t[f"e{filt}"] < max_err)
         return t[mask]
 
@@ -236,7 +237,7 @@ def merge_catalogues(long_file, short_file, out_file, match_arcsec=0.06, max_err
     _, sep, _ = c_shal.match_to_catalog_sky(c_deep)
     keep = sep > match_arcsec * u.arcsec
 
-    merged = np.vstack([deep, shallow[keep]], join_type="outer")
+    merged = vstack([deep, shallow[keep]], join_type="outer")
     merged.write(out_file, overwrite=True)
 
     print(f"deep: {len(deep)}, shallow: {len(shallow)}, "

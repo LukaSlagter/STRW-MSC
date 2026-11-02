@@ -2,6 +2,18 @@ nohup: ignoring input
 Initialized filepaths for :  ['F187N', 'F335M', 'F115W', 'F277W', 'F200W', 'F444W', 'F182M', 'F430M', 'F090W', 'F356W', 'F150W', 'F480M', 'F212N']
 ----Initializing dither calibration for F444W---------
 ----We have a total of 57# to run----------
-(1) Calibrating 1/f:   0%|          | 0/57 [00:00<?, ?it/s](1) Calibrating 1/f: 100%|██████████| 57/57 [00:00<00:00, 48493.98it/s]
-(2) Aligning with gaia catalog:   0%|          | 0/57 [00:00<?, ?it/s](2) Aligning with gaia catalog: 100%|██████████| 57/57 [00:00<00:00, 67118.28it/s]
+(1) Calibrating 1/f:   0%|          | 0/57 [00:00<?, ?it/s](1) Calibrating 1/f: 100%|██████████| 57/57 [00:00<00:00, 63213.99it/s]
+(2) Aligning with gaia catalog:   0%|          | 0/57 [00:00<?, ?it/s](2) Aligning with gaia catalog: 100%|██████████| 57/57 [00:00<00:00, 71429.74it/s]
 WARNING: PhotutilsDeprecationWarning: DEFAULT_COLUMNS is deprecated and will be removed in version 4.0. Use the SourceCatalog.default_columns attribute instead. [jwst.tweakreg.tweakreg_catalog]
+WARNING: MergeConflictWarning: Cannot merge meta key 'SIGSRC' types <class 'float'> and <class 'int'>, choosing SIGSRC=5 [astropy.utils.metadata.merge]
+----Initializing mosaicing for F444W---------
+----Results stored in mosaic_F444W_final-----
+(3) Creating association file
+(4) Running Image3Pipeline JWST with tweakreg DISABLED
+----Completed----
+happy
+----Completed-Splitting-Mosaic----
+Loading previous results!
+Loading previous results!
+deep: 481438, shallow: 235105, duplicates dropped: 4, merged: 716539
+Finished aperture photometry for F444W

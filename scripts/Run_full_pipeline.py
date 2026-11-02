@@ -24,19 +24,20 @@ working_directory = f"{LEVEL2_DIR}/mastDownload/JWST"
 PHOTOMETRIC_pipeline = PPL.Pipeline_level_2_data(working_directory=working_directory)
 
 all_filters = {
-    "F090W": '?',
+    # "F090W": '?',
     "F115W": 200,
-    "F150W": '?',
-    "F182M": '?',
+    # "F150W": '?',
+    # "F182M": '?',
     "F187N": 100,
     "F200W": 200,
-    "F212N": '?',
+    # "F212N": '?',
     "F277W": '?',
     "F335M": '?',
-    "F356W": '?',
-    "F430M": '?',
+    # "F356W": '?',
+    # 'F405N': '?',
+    # "F430M": '?',
     "F444W": 100,
-    "F480M": '?',
+    # "F480M": '?',
 }
 
 def main() -> None:
@@ -59,10 +60,10 @@ def main() -> None:
                             },
                             output_dir=LEVEL3_DIR)
         
-        # Mosiac_ap_path = PHOTOMETRIC_pipeline.Compute_Aperture_Photometry_Mosaic( FILTER= FILTER, wht_threshold = all_filters[FILTER], ncpu = ncpu)
+        Mosiac_ap_path = PHOTOMETRIC_pipeline.Compute_Aperture_Photometry_Mosaic( FILTER= FILTER, wht_threshold = all_filters[FILTER], ncpu = ncpu)
         print(f'Finished aperture photometry for {FILTER}')
-        # return Mosiac_ap_path
-        return
+        return Mosiac_ap_path
+
         
     if FILTER == 'ALL':
         for FILTER_ in all_filters.keys():
