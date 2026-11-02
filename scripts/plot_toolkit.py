@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt, matplotlib.gridspec as gridspec
 from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes, mark_inset
 
-plt.style.use("/home/slagter/Astronomy_master/STRW-MSC/stylish.mplstyle")
+# plt.style.use("/home/slagter/Astronomy_master/STRW-MSC/stylish.mplstyle")
 
 from astropy.io import fits
 import astropy.units as u

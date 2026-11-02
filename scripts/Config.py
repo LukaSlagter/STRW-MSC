@@ -13,14 +13,12 @@ BESSEL_MODELS = PROJECT_ROOT / "Continuum_emission_models/Synphot/Bessell_models
 
 PLOTS_DIR = PROJECT_ROOT / "Plots"
 
-CATALOGUE_JEROEN = CAT_DIR / "NGC346_NIRCam_and_MIRI_Public_JWST_Catalogue.fits"
-POSITIONS_F115W = CAT_DIR / "positions_F115W.fits"
+CATALOGUE_JEROEN = str(CAT_DIR / "NGC346_NIRCam_and_MIRI_Public_JWST_Catalogue.fits")
+POSITIONS_F115W = str(CAT_DIR / "positions_F115W.fits")
 
-GAIA_CATALOGUE = PROJECT_ROOT / "ngc346_gaia_dr3_10arcmin_clean.txt"
-MPLSTYLE = PROJECT_ROOT.parent / "stylish.mplstyle"
+GAIA_CATALOGUE = str(PROJECT_ROOT / "ngc346_gaia_dr3_10arcmin_clean.txt")
+MPLSTYLE = SCRATCH / "stylish.mplstyle"
 
-LEVEL2_DIR = DATA_ROOT / "JWST_NIRCAM_#1227_level_2"
-LEVEL3_DIR = DATA_ROOT / "JWST_NIRCAM_#1227_level_3"
-STARBUG2_BIN = Path(
-    os.environ.get("STARBUG2_BIN", DATA_ROOT / "environment_path/SB_venv/bin/starbug2")
-)
+LEVEL2_DIR = str(DATA_ROOT / "JWST_NIRCAM_#1227_level_2")
+LEVEL3_DIR = str(DATA_ROOT / "JWST_NIRCAM_#1227_level_3")
+STARBUG2_BIN = "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/STARBUG2_venv/bin/starbug2"

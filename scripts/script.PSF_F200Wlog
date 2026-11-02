@@ -1,0 +1,1560 @@
+nohup: ignoring input
+-------------------------TEST1 -------------------------
+Initialized filepaths for :  ['F187N', 'F335M', 'F115W', 'F277W', 'F200W', 'F444W', 'F182M', 'F430M', 'F090W', 'F356W', 'F150W', 'F480M', 'F212N']
+F187N: 216
+F335M: 25
+F115W: 168
+F277W: 32
+F200W: 168
+F444W: 57
+F182M: 43
+F430M: 11
+F090W: 44
+F356W: 10
+F150W: 18
+F480M: 4
+F212N: 28
+F187N: 216
+F335M: 25
+F115W: 168
+F277W: 32
+F200W: 168
+F444W: 57
+F182M: 43
+F430M: 11
+F090W: 44
+F356W: 10
+F150W: 18
+F480M: 4
+F212N: 28
+(A) PSF photometry:   0%|          | 0/168 [00:00<?, ?it/s](A) PSF photometry:   1%|          | 1/168 [00:06<18:23,  6.61s/it](A) PSF photometry:   1%|          | 2/168 [00:09<11:50,  4.28s/it](A) PSF photometry:   2%|▏         | 3/168 [00:12<10:01,  3.65s/it](A) PSF photometry:   2%|▏         | 4/168 [00:14<09:05,  3.32s/it](A) PSF photometry:   3%|▎         | 5/168 [00:17<08:30,  3.13s/it]Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00001_nrca1/jw01227002001_02105_00001_nrca1_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00001_nrca1/jw01227002001_02105_00001_nrca1_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCA1
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.292176e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00001_nrca2/jw01227002001_02105_00001_nrca2_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00001_nrca2/jw01227002001_02105_00001_nrca2_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCA2
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.226579e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00001_nrca3/jw01227002001_02105_00001_nrca3_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00001_nrca3/jw01227002001_02105_00001_nrca3_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCA3
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.312306e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00001_nrca4/jw01227002001_02105_00001_nrca4_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00001_nrca4/jw01227002001_02105_00001_nrca4_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCA4
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.245699e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00001_nrcb1/jw01227002001_02105_00001_nrcb1_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00001_nrcb1/jw01227002001_02105_00001_nrcb1_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCB1
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.221971e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00001_nrcb2/jw01227002001_02105_00001_nrcb2_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00001_nrcb2/jw01227002001_02105_00001_nrcb2_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCB2
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.287239e-08
+-> no background file loaded, measuring sigma clipped median
+(A) PSF photometry:   4%|▎         | 6/168 [00:20<08:17,  3.07s/it](A) PSF photometry:   4%|▍         | 7/168 [00:23<08:05,  3.02s/it](A) PSF photometry:   5%|▍         | 8/168 [00:27<08:27,  3.17s/it](A) PSF photometry:   5%|▌         | 9/168 [00:29<08:07,  3.06s/it](A) PSF photometry:   6%|▌         | 10/168 [00:32<07:45,  2.94s/it](A) PSF photometry:   7%|▋         | 11/168 [00:35<07:41,  2.94s/it]
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00001_nrcb3/jw01227002001_02105_00001_nrcb3_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00001_nrcb3/jw01227002001_02105_00001_nrcb3_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCB3
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.240173e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00001_nrcb4/jw01227002001_02105_00001_nrcb4_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00001_nrcb4/jw01227002001_02105_00001_nrcb4_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCB4
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.306614e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00002_nrca1/jw01227002001_02105_00002_nrca1_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00002_nrca1/jw01227002001_02105_00002_nrca1_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCA1
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.292176e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00002_nrca2/jw01227002001_02105_00002_nrca2_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00002_nrca2/jw01227002001_02105_00002_nrca2_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCA2
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.226579e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00002_nrca3/jw01227002001_02105_00002_nrca3_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00002_nrca3/jw01227002001_02105_00002_nrca3_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCA3
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.312306e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00002_nrca4/jw01227002001_02105_00002_nrca4_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00002_nrca4/jw01227002001_02105_00002_nrca4_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCA4
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.245699e-08
+-> no background file loaded, measuring sigma clipped median
+(A) PSF photometry:   7%|▋         | 12/168 [00:38<07:48,  3.01s/it](A) PSF photometry:   8%|▊         | 13/168 [00:41<07:54,  3.06s/it](A) PSF photometry:   8%|▊         | 14/168 [00:44<07:44,  3.02s/it](A) PSF photometry:   9%|▉         | 15/168 [00:47<07:39,  3.00s/it](A) PSF photometry:  10%|▉         | 16/168 [00:50<07:36,  3.00s/it](A) PSF photometry:  10%|█         | 17/168 [00:53<07:33,  3.00s/it]
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00002_nrcb1/jw01227002001_02105_00002_nrcb1_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00002_nrcb1/jw01227002001_02105_00002_nrcb1_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCB1
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.221971e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00002_nrcb2/jw01227002001_02105_00002_nrcb2_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00002_nrcb2/jw01227002001_02105_00002_nrcb2_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCB2
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.287239e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00002_nrcb3/jw01227002001_02105_00002_nrcb3_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00002_nrcb3/jw01227002001_02105_00002_nrcb3_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCB3
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.240173e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00002_nrcb4/jw01227002001_02105_00002_nrcb4_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00002_nrcb4/jw01227002001_02105_00002_nrcb4_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCB4
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.306614e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00003_nrca1/jw01227002001_02105_00003_nrca1_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00003_nrca1/jw01227002001_02105_00003_nrca1_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCA1
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.292176e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00003_nrca2/jw01227002001_02105_00003_nrca2_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00003_nrca2/jw01227002001_02105_00003_nrca2_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCA2
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.226579e-08
+-> no background file loaded, measuring sigma clipped median
+(A) PSF photometry:  11%|█         | 18/168 [00:56<07:27,  2.98s/it](A) PSF photometry:  11%|█▏        | 19/168 [01:00<07:42,  3.10s/it](A) PSF photometry:  12%|█▏        | 20/168 [01:03<07:37,  3.09s/it](A) PSF photometry:  12%|█▎        | 21/168 [01:06<07:40,  3.14s/it](A) PSF photometry:  13%|█▎        | 22/168 [01:09<07:28,  3.07s/it](A) PSF photometry:  14%|█▎        | 23/168 [01:12<07:28,  3.09s/it]
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00003_nrca3/jw01227002001_02105_00003_nrca3_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00003_nrca3/jw01227002001_02105_00003_nrca3_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCA3
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.312306e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00003_nrca4/jw01227002001_02105_00003_nrca4_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00003_nrca4/jw01227002001_02105_00003_nrca4_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCA4
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.245699e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00003_nrcb1/jw01227002001_02105_00003_nrcb1_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00003_nrcb1/jw01227002001_02105_00003_nrcb1_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCB1
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.221971e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00003_nrcb2/jw01227002001_02105_00003_nrcb2_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00003_nrcb2/jw01227002001_02105_00003_nrcb2_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCB2
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.287239e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00003_nrcb3/jw01227002001_02105_00003_nrcb3_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00003_nrcb3/jw01227002001_02105_00003_nrcb3_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCB3
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.240173e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00003_nrcb4/jw01227002001_02105_00003_nrcb4_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00003_nrcb4/jw01227002001_02105_00003_nrcb4_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCB4
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.306614e-08
+-> no background file loaded, measuring sigma clipped median
+(A) PSF photometry:  14%|█▍        | 24/168 [01:15<07:15,  3.03s/it](A) PSF photometry:  15%|█▍        | 25/168 [01:18<07:17,  3.06s/it](A) PSF photometry:  15%|█▌        | 26/168 [01:21<07:08,  3.02s/it](A) PSF photometry:  16%|█▌        | 27/168 [01:24<07:06,  3.02s/it](A) PSF photometry:  17%|█▋        | 28/168 [01:27<06:54,  2.96s/it](A) PSF photometry:  17%|█▋        | 29/168 [01:30<06:51,  2.96s/it]
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00004_nrca1/jw01227002001_02105_00004_nrca1_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00004_nrca1/jw01227002001_02105_00004_nrca1_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCA1
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.292176e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00004_nrca2/jw01227002001_02105_00004_nrca2_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00004_nrca2/jw01227002001_02105_00004_nrca2_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCA2
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.226579e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00004_nrca3/jw01227002001_02105_00004_nrca3_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00004_nrca3/jw01227002001_02105_00004_nrca3_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCA3
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.312306e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00004_nrca4/jw01227002001_02105_00004_nrca4_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00004_nrca4/jw01227002001_02105_00004_nrca4_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCA4
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.245699e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00004_nrcb1/jw01227002001_02105_00004_nrcb1_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00004_nrcb1/jw01227002001_02105_00004_nrcb1_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCB1
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.221971e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00004_nrcb2/jw01227002001_02105_00004_nrcb2_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00004_nrcb2/jw01227002001_02105_00004_nrcb2_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCB2
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.287239e-08
+-> no background file loaded, measuring sigma clipped median
+(A) PSF photometry:  18%|█▊        | 30/168 [01:33<07:10,  3.12s/it](A) PSF photometry:  18%|█▊        | 31/168 [01:36<06:56,  3.04s/it](A) PSF photometry:  19%|█▉        | 32/168 [01:39<06:57,  3.07s/it](A) PSF photometry:  20%|█▉        | 33/168 [01:42<06:52,  3.06s/it](A) PSF photometry:  20%|██        | 34/168 [01:45<06:56,  3.11s/it](A) PSF photometry:  21%|██        | 35/168 [01:49<06:54,  3.12s/it]
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00004_nrcb3/jw01227002001_02105_00004_nrcb3_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00004_nrcb3/jw01227002001_02105_00004_nrcb3_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCB3
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.240173e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00004_nrcb4/jw01227002001_02105_00004_nrcb4_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002001_02105_00004_nrcb4/jw01227002001_02105_00004_nrcb4_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCB4
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.306614e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002002_02105_00001_nrca1/jw01227002002_02105_00001_nrca1_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002002_02105_00001_nrca1/jw01227002002_02105_00001_nrca1_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCA1
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.292176e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002002_02105_00001_nrca2/jw01227002002_02105_00001_nrca2_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002002_02105_00001_nrca2/jw01227002002_02105_00001_nrca2_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCA2
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.226579e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002002_02105_00001_nrca3/jw01227002002_02105_00001_nrca3_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002002_02105_00001_nrca3/jw01227002002_02105_00001_nrca3_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCA3
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.312306e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002002_02105_00001_nrca4/jw01227002002_02105_00001_nrca4_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002002_02105_00001_nrca4/jw01227002002_02105_00001_nrca4_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCA4
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.245699e-08
+-> no background file loaded, measuring sigma clipped median
+(A) PSF photometry:  21%|██▏       | 36/168 [01:52<06:55,  3.15s/it](A) PSF photometry:  22%|██▏       | 37/168 [01:55<06:52,  3.15s/it](A) PSF photometry:  23%|██▎       | 38/168 [01:58<06:55,  3.19s/it](A) PSF photometry:  23%|██▎       | 39/168 [02:01<06:40,  3.11s/it](A) PSF photometry:  24%|██▍       | 40/168 [02:05<06:51,  3.22s/it](A) PSF photometry:  24%|██▍       | 41/168 [02:08<06:36,  3.12s/it]
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002002_02105_00001_nrcb1/jw01227002002_02105_00001_nrcb1_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002002_02105_00001_nrcb1/jw01227002002_02105_00001_nrcb1_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCB1
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.221971e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002002_02105_00001_nrcb2/jw01227002002_02105_00001_nrcb2_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002002_02105_00001_nrcb2/jw01227002002_02105_00001_nrcb2_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCB2
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.287239e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002002_02105_00001_nrcb3/jw01227002002_02105_00001_nrcb3_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002002_02105_00001_nrcb3/jw01227002002_02105_00001_nrcb3_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCB3
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.240173e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002002_02105_00001_nrcb4/jw01227002002_02105_00001_nrcb4_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002002_02105_00001_nrcb4/jw01227002002_02105_00001_nrcb4_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCB4
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.306614e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002002_02105_00002_nrca1/jw01227002002_02105_00002_nrca1_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002002_02105_00002_nrca1/jw01227002002_02105_00002_nrca1_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCA1
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.292176e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002002_02105_00002_nrca2/jw01227002002_02105_00002_nrca2_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002002_02105_00002_nrca2/jw01227002002_02105_00002_nrca2_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCA2
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.226579e-08
+-> no background file loaded, measuring sigma clipped median
+(A) PSF photometry:  25%|██▌       | 42/168 [02:11<06:28,  3.08s/it](A) PSF photometry:  26%|██▌       | 43/168 [02:14<06:21,  3.06s/it](A) PSF photometry:  26%|██▌       | 44/168 [02:17<06:16,  3.03s/it](A) PSF photometry:  27%|██▋       | 45/168 [02:20<06:17,  3.07s/it](A) PSF photometry:  27%|██▋       | 46/168 [02:23<06:17,  3.09s/it](A) PSF photometry:  28%|██▊       | 47/168 [02:26<06:12,  3.08s/it]
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002002_02105_00002_nrca3/jw01227002002_02105_00002_nrca3_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002002_02105_00002_nrca3/jw01227002002_02105_00002_nrca3_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCA3
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.312306e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002002_02105_00002_nrca4/jw01227002002_02105_00002_nrca4_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002002_02105_00002_nrca4/jw01227002002_02105_00002_nrca4_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCA4
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.245699e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002002_02105_00002_nrcb1/jw01227002002_02105_00002_nrcb1_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002002_02105_00002_nrcb1/jw01227002002_02105_00002_nrcb1_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCB1
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.221971e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002002_02105_00002_nrcb2/jw01227002002_02105_00002_nrcb2_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002002_02105_00002_nrcb2/jw01227002002_02105_00002_nrcb2_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCB2
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.287239e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002002_02105_00002_nrcb3/jw01227002002_02105_00002_nrcb3_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002002_02105_00002_nrcb3/jw01227002002_02105_00002_nrcb3_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCB3
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.240173e-08
+-> no background file loaded, measuring sigma clipped median
+
+STDERR:
+ AP_FILE "/local/scratch/lslagter/MSC_project/STRW-MSC/Photometry/catalogue_jeroen/positions_F115W.fits" does not exist
+unable to estimate background, no source list loaded
+unable to run photometry: no source list loaded
+
+Launching Starbug environment in its venv...
+[1mlaunching [36mstarbug[0m
+
+                   *          *  __  *  __   - * --   - 
+ STARBUGII               *      / ___ /    \   --  -      - 
+ ---------                 *___---.    .___/  -   --   -
+ JWST photometry in       ./=== \  \.     \      * 
+ complex crowded fields   | (O)  |  |     |           *
+                           \._._/ ./    _(\)   *   
+ conor.nally@ed.ac.uk     /   ~--\ ----~   \      *
+                        ---      ___       ---      
+ > https://starbug2.readthedocs.io/en/latest/
+
+-> showing starbug stdout for "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002002_02105_00002_nrcb4/jw01227002002_02105_00002_nrcb4_cal_1overf_jhat.fits"
+loaded: "/home/lslagter/scratch/lslagter/MSC_project/STRW-MSC/JWST_NIRCAM_#1227_level_2/mastDownload/JWST/jw01227002002_02105_00002_nrcb4/jw01227002002_02105_00002_nrcb4_cal_1overf_jhat.fits"
+-> using image HDU: 1 (SCI)
+-> photometric band: F200W
+-> detector module: NRCB4
+-> pipeline stage: 2
+Checking internal systems..
+
+Estimating Diffuse Background
+
+Running PSF Photometry
+-> converting unit from MJy/sr to Jr with factor: 2.306614e-08
+-> no background file loaded, measuring sigma clipped median
+(A) PSF photometry:  29%|██▊       | 48/168 [02:29<06:10,  3.09s/it](A) PSF photometry:  29%|██▉       | 49/168 [02:32<06:08,  3.10s/it](A) PSF photometry:  30%|██▉       | 50/168 [02:35<06:03,  3.08s/it](A) PSF photometry:  30%|███       | 51/168 [02:39<06:24,  3.29s/it](A) PSF photometry:  31%|███       | 52/168 [02:42<06:10,  3.19s/it](A) PSF photometry:  32%|███▏      | 53/168 [02:45<05:55,  3.09s/it]

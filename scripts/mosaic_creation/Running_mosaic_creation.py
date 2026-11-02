@@ -1,10 +1,10 @@
 import sys
 from pathlib import Path
 
-scripts_path = str(Path.cwd().parents[1]) + "/scripts/"
+scripts_path = str(Path.cwd().parents[0]) + "/STRW-MSC/scripts/"
 if scripts_path not in sys.path:
     sys.path.insert(0, scripts_path)
-
+print(scripts_path)
 
 from Config import (
     LEVEL2_DIR,
@@ -17,16 +17,17 @@ PHOTOMETRIC_pipeline = PPL.Pipeline_level_2_data(working_directory=working_direc
 
 
 def main() -> None:
-
-    PHOTOMETRIC_pipeline.calibrate_all_individual_dithers(
-        filt="F115W",
-        overwrite_dic={
-            "1/f": True,
-            "Jhat calibration": True,
-            "Association file": True,
-            "Image3Pipeline": True,
-        },
-    )
+    for filt in ["F115W", "F187N", "F405N","F090W","F150W","F182M","F212N","F277W","F335M","F356W","F430M","F444W","F480M"]:
+                        
+        PHOTOMETRIC_pipeline.Run_AP_on_all_dither(
+            filt=filt,
+            overwrite_dic={
+                "1/f": False,
+                "Jhat calibration": False,
+                "Association file": True,
+                "Image3Pipeline": True,
+            },
+        )
 
 
 if __name__ == "__main__":

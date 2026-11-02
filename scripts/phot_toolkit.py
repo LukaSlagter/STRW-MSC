@@ -10,7 +10,10 @@ import astropy.units as u, astropy.constants as const
 from astropy.table import Table
 from astropy.io import fits
 from astropy.coordinates import SkyCoord
-
+from Config import (
+    LEVEL2_DIR,
+    LEVEL3_DIR,
+)
 
 # ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= =======
 # Reading Jeroens catalogue + masking region
@@ -156,11 +159,10 @@ def in_wcs_mask(ra, dec, wcs, shape):
     return mask
 
 
-level3_data_path = "/net/vdesk/data2/slagter/JWST_NIRCAM_#1227_level_3/"
 
 
 def Split_Mosaic_on_WHT(
-    mosaic_path=level3_data_path + "mosaic_F115W_final_i2d.fits", wht_threshold=200.0
+    mosaic_path=str(LEVEL3_DIR) + "mosaic_F115W_final_i2d.fits",filt='F115W', wht_threshold=200.0
 ):
 
     hdu = fits.open(mosaic_path)
@@ -197,17 +199,18 @@ def Split_Mosaic_on_WHT(
                 name=fit_frame,
             )
         )
+    print('happy')
 
     hdu_out = fits.HDUList([fits.PrimaryHDU(header=hdu[0].header)] + long_exposure_data)
     hdu_out.writeto(
-        level3_data_path + "mosaic_F115W_long_exposure.fits", overwrite=True
+        str(LEVEL3_DIR) + f"/mosaic_{filt}_long_exposure.fits", overwrite=True
     )
 
     hdu_out = fits.HDUList(
         [fits.PrimaryHDU(header=hdu[0].header)] + short_exposure_data
     )
     hdu_out.writeto(
-        level3_data_path + "mosaic_F115W_short_exposure.fits", overwrite=True
+        str(LEVEL3_DIR) + f"/mosaic_{filt}_short_exposure.fits", overwrite=True
     )
 
     hdu.close()

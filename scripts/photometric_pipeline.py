@@ -24,8 +24,8 @@ from Config import (
     STARBUG2_BIN,
 )
 
-if MPLSTYLE.exists():
-    plt.style.use(str(MPLSTYLE))
+# if MPLSTYLE.exists():
+#     plt.style.use(str(MPLSTYLE))
 
 # ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= =======
 # Data reduction pipeline for level 2 data, single dither or full mosaic
@@ -79,7 +79,7 @@ class Pipeline_level_2_data:
             else:
                 print(f"    (SKIPPED) Calibrating 1/f            -- Using previous run")
             if (
-                Path(self.files.file_paths_1overf[filt][IMAGE_INDEX]).exists() == False
+                Path(self.files.file_paths_1overf_jhat[filt][IMAGE_INDEX]).exists() == False
                 or overwrite_dic["Jhat calibration"] == True
             ):
                 print(f"    (2) Aligning with gaia catalog")
@@ -190,8 +190,8 @@ class Pipeline_level_2_data:
         from jwst.associations.lib.rules_level3_base import DMS_Level3_Base
 
         mosaic_title = f"mosaic_{filt}_final"
-        association_path = output_dir / f"{mosaic_title}.json"
-        mosaic_path = output_dir / f"{mosaic_title}_i2d.fits"
+        association_path = str(output_dir) + f"/{mosaic_title}.json"
+        mosaic_path = output_dir + f"/{mosaic_title}_i2d.fits"
         print(f"----Results stored in {mosaic_title}-----")
 
         Number_of_frames = len(self.files.file_paths_1overf[filt])
@@ -212,13 +212,16 @@ class Pipeline_level_2_data:
             range(Number_of_frames), desc="(2) Aligning with gaia catalog"
         ):
             if (
-                Path(self.files.file_paths_1overf[filt][IMAGE_INDEX]).exists() == False
-                or overwrite_dic["1/f"] == True
+                Path(self.files.file_paths_1overf_jhat[filt][IMAGE_INDEX]).exists() == False
+                or overwrite_dic["Jhat calibration"] == True
             ):
                 self.assign_WCS_from_gaia_dr3(IMAGE_INDEX=IMAGE_INDEX, filter=filt)
 
         # Now we have filled each folder with its 1/f calibrated fits file with its WCS attached
         print("(3) Creating association file")
+        output_dir = Path(output_dir); output_dir.mkdir(parents=True, exist_ok=True)
+        asn_file = association_path  
+
         if (Path(association_path).exists() == False) or (
             overwrite_dic["Association file"] == True
         ):
@@ -231,7 +234,6 @@ class Pipeline_level_2_data:
                 cal_files, rule=DMS_Level3_Base, product_name=mosaic_title
             )
 
-            asn_file = output_dir + f"{mosaic_title}.json"
             with open(asn_file, "w") as f:
                 f.write(asn.dump()[1])
 
@@ -248,7 +250,10 @@ class Pipeline_level_2_data:
             }
 
             result = Image3Pipeline.call(
-                asn_file, steps=parameter_dict, save_results=True, output_dir=output_dir
+                str(asn_file),
+                steps=parameter_dict,
+                save_results=True,
+                output_dir=str(output_dir),
             )
 
         print("----Completed----")
@@ -451,15 +456,11 @@ class Pipeline_level_2_data:
         """
         print("Launching Starbug environment in its venv...")
         result = subprocess.run(cmd, capture_output=True, text=True)
-        if result.returncode != 0:
-            print("STDOUT:\n", result.stdout)
+        if result.stdout and toggle_sb_output_txt:
+            print(result.stdout)
+        if result.stderr:
             print("STDERR:\n", result.stderr)
-            result.check_returncode()
-
-        if toggle_sb_output_txt == True:
-            print(result.stdout)  # prints the starbug2 terminal output :D
-            print("---------------------------")
-            print()
+        result.check_returncode()
 
         return
     # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -469,6 +470,9 @@ class Pipeline_level_2_data:
                                       filt,
                                       N_CPUS = 2
                                       ):
+                
+        for filter in self.files.file_paths_1overf_jhat.keys():
+            print(f"{filter}: {len(self.files.file_paths_1overf_jhat[filter])}")
         Number_of_frames = len(self.files.file_paths_1overf_jhat[filt])
         source_path = POSITIONS_F115W
 
@@ -706,6 +710,8 @@ class File_Finder:
             name = input_cal_file.replace("_cal.fits", "_cal_1overf_jhat-ap.fits")
         elif mode == "jhat_bg":
             name = input_cal_file.replace("_cal.fits", "_cal_1overf_jhat-bgd.fits")
+        elif mode == "jhat_psf":
+            name = input_cal_file.replace("_cal.fits", "_cal_1overf_jhat-psf.fits")
 
         else:
             print(f"{mode} is not valid")
@@ -741,6 +747,7 @@ class File_Finder:
             ("jhat", "file_paths_1overf_jhat"),
             ("jhat_ap", "file_paths_jhat_ap"),
             ("jhat_bg", "file_paths_jhat_bgd"),
+            ("jhat_psf", "file_paths_jhat_psf")
         ]:
             setattr(
                 self,
