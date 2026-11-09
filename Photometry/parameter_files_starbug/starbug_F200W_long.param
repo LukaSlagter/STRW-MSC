@@ -48,15 +48,15 @@ ZP_MAG      = 8.9        //Zero point (mag) to add to the magnitude columns
 CRIT_SEP    = 4             //minimum distance for grouping (pixels) between two sources
 FORCE_POS   = 0          //Force centroid position (1) or allow psf fitting to fit position too (0)
 DPOS_THRESH = -1         //If allowed to fit position, max separation (arcsec) from source list centroid
-MAX_XYDEV   = 3p         //Maximum deviation from initial guess centroid position
-PSF_SIZE    = -1         //Set fit size of psf (>0) or -1 to take PSF file dimensions
+MAX_XYDEV   = 0.1s         //Maximum deviation from initial guess centroid position
+PSF_SIZE    = 161         //Set fit size of psf (>0) or -1 to take PSF file dimensions
 GEN_RESIDUAL= 0          //Generate a residual image
 
 ## SOURCE STATS
 CALC_CROWD  = 1          //Run crowding metric calculation (execution time scales N^2)
 
 ## CATALOGUE MATCHING
-MATCH_THRESH= 0.1                 //matching separation threshold in units arcsec
+MATCH_THRESH= 0.1                 //matching separation threshold in units arcsecjk
 MATCH_COLS  =            //EXTRA columns to include in output matched table i.e sharpness
 NEXP_THRESH = 3                     //Keep sources that appear in NUM >= NEXP_THRESH (if -1 keep everything)
 SN_THRESH   = -1         //Remove sources with SN ratio < SN_THRESH before matching (default -1 to not apply this cut)

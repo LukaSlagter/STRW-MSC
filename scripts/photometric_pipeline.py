@@ -10,7 +10,7 @@ import astropy.units as u, astropy.constants as const
 from astropy.visualization import ZScaleInterval
 from astropy.io import fits
 from astropy import wcs
-
+import re
 
 from Config import (
     CATALOGUE_JEROEN,
@@ -28,6 +28,12 @@ if MPLSTYLE.exists():
     plt.style.use(str(MPLSTYLE))
 
 
+JWST_RE = re.compile(
+    r"jw(?P<prog>\d{5})(?P<obs>\d{3})(?P<visit>\d{3})"
+    r"_(?P<vgrp>[0-9a-z]{2})(?P<seq>\d)(?P<act>[0-9a-z]{2})"
+    r"_(?P<exp>\d{5})_(?P<det>[a-z0-9]+)",
+    re.IGNORECASE,
+    )
 # ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= =======
 # Data reduction pipeline for level 2 data, single dither or full mosaic
 # ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= =======
@@ -91,6 +97,7 @@ class Pipeline_level_2_data:
             "Association file": False,
             "Image3Pipeline file": False,
         },
+        field_mode = 'outskirt',
         output_dir=LEVEL3_DIR,
     ):
 
@@ -106,7 +113,7 @@ class Pipeline_level_2_data:
 
         mosaic_title = f"mosaic_{FILTER}_final"
         association_path = str(output_dir) + f"/{mosaic_title}.json"
-        mosaic_path = output_dir + f"/{mosaic_title}_i2d.fits"
+        mosaic_path = output_dir + f"/{mosaic_title}_{field_mode}.fits"
         print(f"----Results stored in {mosaic_title}-----")
 
         # Now we have filled each folder with its 1/f calibrated fits file with its WCS attached
@@ -114,11 +121,20 @@ class Pipeline_level_2_data:
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
         asn_file = association_path
+        
+        self.files.tag_regions()
+        if field_mode == 'outskirt':
+            # Select the outskirt regions    
+            files_mask = self.files.outskirt_mask[FILTER].astype(bool)
+        else:
+            # Select the inner regions
+            files_mask = ~self.files.outskirt_mask[FILTER].astype(bool)
+
 
         if (Path(association_path).exists() == False) or (
             overwrite_dic["Association file"] == True
         ):
-            cal_files = self.files.file_paths_1overf_jhat[FILTER]
+            cal_files = np.array(self.files.file_paths_1overf_jhat[FILTER])[files_mask]
             asn = asn_from_list.asn_from_list(
                 cal_files, rule=DMS_Level3_Base, product_name=mosaic_title
             )
@@ -148,20 +164,21 @@ class Pipeline_level_2_data:
         print("----Completed----")
         return
 
-    def Compute_Aperture_Photometry_Mosaic(self, FILTER, wht_threshold, ncpu=2):
+
+    def Compute_Aperture_Photometry_Mosaic(self, FILTER, wht_threshold, field_mode ='inner', ncpu=2):
         """
         Run starbug2 aperture source detection and photometry on final mosaic.
         Consider the selection parameters based on the WHT extension, splitting the deep/long exposed region
         and the shallow/shorter exposed. Final catalgoue is merged with detection of overlapping sources
         """
         # Create binary distinction for based on the WHT_threshold!
-        PTK.Split_Mosaic_on_WHT(FILTER=FILTER, wht_threshold=int(wht_threshold))
+        PTK.Split_Mosaic_on_WHT(FILTER=FILTER, wht_threshold=int(wht_threshold), field_mode = field_mode )
 
         for mode in ["short", "long"]:
             mosaic_ap_path = (
-                str(LEVEL3_DIR) + f"/mosaic_{FILTER}_{mode}_exposure-ap.fits"
+                str(LEVEL3_DIR) + f"/mosaic_{FILTER}_{field_mode}_{mode}_exposure-ap.fits"
             )
-            mosaic_path = str(LEVEL3_DIR) + f"/mosaic_{FILTER}_{mode}_exposure.fits"
+            mosaic_path = str(LEVEL3_DIR) + f"/mosaic_{FILTER}_{field_mode}_{mode}_exposure.fits"
             if Path(mosaic_ap_path).exists():
                 print("Loading previous results!")
             else:
@@ -176,14 +193,13 @@ class Pipeline_level_2_data:
                 else:
                     print(f"Path doesn't exist: {mosaic_path}")
 
-        out_file = str(LEVEL3_DIR) + f"/mosaic_{FILTER}_merged_exposure-ap.fits"
+        out_file = str(LEVEL3_DIR) + f"/mosaic_{FILTER}_{field_mode}_merged_exposure-ap.fits"
         PTK.merge_long_short(
-            long_file=str(LEVEL3_DIR) + f"/mosaic_{FILTER}_long_exposure-ap.fits",
-            short_file=str(LEVEL3_DIR) + f"/mosaic_{FILTER}_short_exposure-ap.fits",
+            long_file=str(LEVEL3_DIR) + f"/mosaic_{FILTER}_{field_mode}_long_exposure-ap.fits",
+            short_file=str(LEVEL3_DIR) + f"/mosaic_{FILTER}_{field_mode}_short_exposure-ap.fits",
             out_file=out_file,
             match_arcsec=0.06,
         )
-
         return out_file
 
     def Compose_PSF_weighted_catalogue(self, FILTER):
@@ -313,7 +329,6 @@ class Pipeline_level_2_data:
     # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     # Aperture photometry / source detection with STARBUG2
     # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-
     def starbug2_aperture_photometry_on_dither(
         self,
         IMAGE_INDEX,
@@ -384,7 +399,7 @@ class Pipeline_level_2_data:
             STARBUG2_BIN,
             "-p",  # Work with own parameters files based on FILTER and exposure time (see jeroen)
             self._determine_filename_sb2_param(FILTER, mode=mode),
-            "-vDA",  # v = verbose, D = detect with the parameter file!, A= aperture photometry
+            "-vDGA",  # v = verbose, D = detect with the parameter file!, A= aperture photometry
             mosaic_path,
             "-n",
             str(N_CPUS),
@@ -432,7 +447,7 @@ class Pipeline_level_2_data:
                 "-p",
                 self._determine_filename_sb2_param(FILTER, mode="long"),
                 "-s",
-                "DPOS_THRESH=0.1",
+                "MAX_XYDEV =0.1s",
                 "-n",
                 str(N_CPUS),
                 "-vBP",
@@ -510,6 +525,8 @@ class Pipeline_level_2_data:
         """
         if mode is None:
             return None
+        if mode is 'explore':
+            return str(SB_PARAM_DIR) + f"/starbug_{mode}.param"
         return str(SB_PARAM_DIR) + f"/starbug_{FILTER}_{mode}.param"
 
     def _get_cmd_unknown_sources(self, starbug_path, IMAGE_INDEX, FILTER):
@@ -720,6 +737,7 @@ class Pipeline_level_2_data:
         return
 
 
+
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # File organisation
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -819,6 +837,49 @@ class File_Finder:
             print(f"Warning: {len(self.unmatched)} files had no resolvable FILTER")
 
         return
+
+        
+    def tag_regions(self):
+        """
+        Based on the observation proposal number in the names select the outskirt (obs # =17)
+        """
+
+        self.outskirt_mask = {}
+        for FILTER, paths in self.file_paths.items():
+            mask = np.array([is_outskirt(p) for p in paths], dtype=bool)
+            self.outskirt_mask[FILTER] = mask
+
+            outskirt_paths = [p for p, m in zip(paths, mask) if m]
+            inner_paths   = [p for p, m in zip(paths, mask) if not m]
+            print(f"{FILTER}: {mask.sum()} outskirt, {(~mask).sum()} center")
+        
+        return inner_paths ,outskirt_paths
+
+
+
+def parse_name(path):
+    m = JWST_RE.search(os.path.basename(path))
+
+    return {"obs": int(m["obs"]),
+            "visit": int(m["visit"]),
+            "seq": int(m["seq"]),      # 1 = prime, >=2 = parallel
+            "det": m["det"].lower(),   # e.g. nrcb2, nrcalong,
+        }
+
+def is_outskirt(path):
+    OUTSKIRT = {14, 17, 26}
+    INNER = {2,25}
+    info = parse_name(path)
+    obs, seq, det = info["obs"], info["seq"], info["det"]
+
+    if obs in OUTSKIRT:
+        return True
+
+    elif obs in INNER:
+        return False
+
+    else:
+        raise(ValueError)
 
 
 # ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= ======= =======

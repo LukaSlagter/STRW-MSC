@@ -17,6 +17,7 @@ import synphot
 import astropy.constants as const
 from tqdm import tqdm
 from astropy.constants import Constant
+import plot_toolkit as PLOT
 
 # Fetch one filter's transmission curve
 from astroquery.svo_fps import SvoFps
@@ -52,7 +53,7 @@ def create_wavelength_space_um():
     return (np.logspace(2, 6.5, int(1e5)) * u.AA).to(u.um)
 
 
-def Compute_FWHM_from_Weq(Weq):
+def Compute_FWHM_from_std(std):
     """
     Compute the FWHM from equavalent width ussuming line is GAUSSIAN
 
@@ -66,7 +67,7 @@ def Compute_FWHM_from_Weq(Weq):
         Gaussian FWHM
 
     """
-    return (2 * np.sqrt(2 * np.log(2) / np.pi)) * Weq
+    return 2 * np.sqrt(2 * np.log(2)) * std
 
 
 def finetuned_wavelength_space_um(
@@ -101,25 +102,26 @@ def _Obtain_transmission_curve(filter="F115W"):
         lookup_table=tbl["Transmission"].data,
     )
 
-
 class Line_Strength:
     def __init__(self, continuum_mode, **kwargs):
-        allowed_continuum_mode = {
+        self.allowed_continuum_mode = {
             "Robitaille": self._Obtain_continuum_Robitaille,
             "Bessel": self._Obtain_continuum_Bessel,
             "Bessel + BB disk": self._Obtain_continuum_Bessel_plus_BB,
         }
-
-        if continuum_mode not in allowed_continuum_mode:
-            raise ValueError(
-                f"'{continuum_mode}' is not valid. "
-                f"Choose from: {list(allowed_continuum_mode)}"
-            )
-
-        self.sp_continuum = allowed_continuum_mode[continuum_mode](**kwargs)
+        self.change_continuum_model(continuum_mode, **kwargs)
         self.sp_tot = self.sp_continuum
         return
 
+    def change_continuum_model(self, continuum_mode, **kwargs):
+        if continuum_mode not in self.allowed_continuum_mode:
+            raise ValueError(
+                f"'{continuum_mode}' is not valid. "
+                f"Choose from: {list(self.allowed_continuum_mode)}"
+            )
+        self.sp_continuum = self.allowed_continuum_mode[continuum_mode](**kwargs)
+        return
+    
     def _reset_spectrum(
         self,
     ):
@@ -129,7 +131,7 @@ class Line_Strength:
         self.sp_tot = self.sp_continuum
         return
 
-    def Compute_model_abs_MAG(self, spectrum, filter="F115W"):
+    def Compute_model_abs_MAG(self, spectrum, filter):
         """
         Parameters
         ----------
@@ -141,6 +143,7 @@ class Line_Strength:
         -------
         Absolute magnitude of observation
         """
+
         bp = _Obtain_transmission_curve(filter=filter)
 
         # Convolce spectrum with the transmission curve
@@ -155,10 +158,14 @@ class Line_Strength:
             obs.effstim(flux_unit=units.VEGAMAG) + _Absolute_vega_mag_corr()
         ).value  # NOTE THE SQUARED MAG UNIT
 
+    def Compute_std_Doppler_broadening(self, T=1000*u.K):
+        return np.sqrt(const.k_B * T /  const.m_p * const.c**(-2)).decompose()
+
     def Add_emission_line_to_spectrum(self, lam0, Weq):
         F_cont = self.sp_continuum(lam0, flux_unit="FLAM")  # erg/s/cm2/AA
         total_flux = (Weq * F_cont).to(u.erg / u.s / u.cm**2)  # erg/s/cm2
-        fwhm = Compute_FWHM_from_Weq(Weq=Weq)
+        std =lam0* self.Compute_std_Doppler_broadening( T=1000*u.K)
+        fwhm= Compute_FWHM_from_std(std=std)
 
         self.sp_line = SourceSpectrum(
             GaussianFlux1D, total_flux=total_flux, mean=lam0, fwhm=fwhm
@@ -204,7 +211,7 @@ class Line_Strength:
             )
 
             ax_zoom.set_xlim(x0, x1)
-            ymin, ymax = (0.9 * np.min(ytot), 1.1 * np.max(ytot))
+            ymin, ymax = (0.9 * np.min(y_cont), 1.1 * np.max(y_cont))
             ax_zoom.set_ylim(ymin, ymax)
             ax_zoom.set_xlabel(r"$\lambda\ [\mu\mathrm{m}]$")
             ax_zoom.set_yscale("log")
@@ -248,7 +255,7 @@ class Line_Strength:
 
         self.wave_um = finetuned_wavelength_space_um()
         total_lam_flam = self._lam_flam(self.sp_tot)
-        normalisation = np.nanmax(total_lam_flam)
+        normalisation = np.nanmax(self._lam_flam(self.sp_continuum))
 
         ax0.plot(
             self.wave_um,
@@ -277,7 +284,7 @@ class Line_Strength:
             ax0.axvline(lam, lw=1, ls=":", color=col)
             ax0.text(lam, 3e-4, name, color=col, rotation=90, ha="right", va="bottom")
 
-        delta_pa_alpja = Weq1 * 5
+        delta_pa_alpja = 0.10 * u.um# Weq1#wave_pa_alpha* self.Compute_std_Doppler_broadening(T=1000*u.K) *500
         Filter_range_pa = _Obtain_transmission_curve(filter="F187N").waverange
 
         wave_line1 = np.linspace(
@@ -307,7 +314,7 @@ class Line_Strength:
             Filter_range=Filter_range_pa,
         )
 
-        delta_br_alpja = Weq2 * 5
+        delta_br_alpja = 0.20 * u.um
         Filter_range_br = _Obtain_transmission_curve(filter="F405N").waverange
         wave_line2 = np.linspace(
             wave_br_alpha - delta_br_alpja, wave_br_alpha + delta_br_alpja, 10000
@@ -337,7 +344,7 @@ class Line_Strength:
         )
 
         ax0.set_xlim(0.1, 60)
-        ax0.set_ylim(1e-4, 1e3)
+        ax0.set_ylim(1e-6, 3e0)
         ax0.yaxis.set_major_formatter(ticker.FormatStrFormatter("%.2f"))
 
         ax0.set_xscale("log")
@@ -413,7 +420,7 @@ class Line_Strength:
 
         return sp_continuum
 
-    def _Obtain_continuum_Bessel(self, T_eff=5000, g_surface="g45"):
+    def _Obtain_continuum_Bessel(self, T_eff, g_surface="g45"):
         paths_and_temps = []
         for p in Path(BESSEL_MODELS).iterdir():
             if p.suffix == ".fits":
@@ -457,6 +464,24 @@ class Line_Strength:
         return
 
 
+def Compute_delta_m_no_lines_over_model(filters, Tspace=np.linspace(4000, 10000, 12) *u.K):
+    continuum_mode="Bessel"
+    kwargs = {"T_eff": Tspace[0], "g_surface": "g45"}
+    
+    MAGS_per_filter = np.zeros((len(filters), len(Tspace)))
+    SPEC = Line_Strength(continuum_mode=continuum_mode, **kwargs)
+
+    for T_idx, T in enumerate(tqdm(Tspace)):
+        kwargs = {"T_eff": T, "g_surface": "g45"}
+
+        SPEC.change_continuum_model(continuum_mode, **kwargs )
+        for F_idx, FILT in enumerate(filters):
+                    MAGS_per_filter[F_idx, T_idx] = SPEC.Compute_model_abs_MAG(
+                        spectrum=SPEC.sp_continuum, filter=FILT
+                    )
+
+    return MAGS_per_filter
+
 def Compute_delta_m_weq(lam0, filters, N_Weq=100, continuum_mode="Bessel", **kwargs):
     SPEC = Line_Strength(continuum_mode=continuum_mode, **kwargs)
 
@@ -484,7 +509,7 @@ def Compute_delta_m_weq(lam0, filters, N_Weq=100, continuum_mode="Bessel", **kwa
 
 
 def Plot_delta_m_weq(Weqs, mag_diff_dic):
-    fig = plt.figure(figsize=(7, 5))
+    fig = plt.figure(figsize=(6, 4))
     gs = gridspec.GridSpec(1, 1, figure=fig, hspace=0.3, wspace=0.2)
     ax = fig.add_subplot(gs[0, 0])
 
@@ -494,7 +519,7 @@ def Plot_delta_m_weq(Weqs, mag_diff_dic):
             Weqs, mag_diff_data, c=color, edgecolors="black", marker="o", label=mag_diff
         )
 
-    # ax.axhline(0.1, ls="--", lw=2, c="black")
+    #ax.axhline(0.2, ls="--", lw=2, c="black")
 
     ax.set_ylabel(
         r"$\Delta m = m_{\mathrm{no \ line}} - m_{\mathrm{line}}$", fontsize=15
@@ -502,12 +527,95 @@ def Plot_delta_m_weq(Weqs, mag_diff_dic):
     ax.set_xlabel(r"$W_{eq}$ [Å]", fontsize=15)
 
     ax.set_xscale("log")
-    ax.set_yscale("linear")
+    #ax.set_yscale("log")
 
     ax.set_xlim((Weqs.value).min(), (Weqs.value).max())
-    ax.set_ylim(-0.05, 1)
+    ax.set_ylim(-.05, 1)
+
 
     ax.legend(loc="upper left")
+    plt.savefig('delta_m_EW.pdf', bbox_inches='tight')
+    plt.show()
 
+    return
+
+def Fit_CC_relation(x, y):
+    """
+    Least-Squares fit to linear relation ship
+    """
+    slope, intercept = np.polyfit(x, y, deg = 1)
+    def _fitted_func(xn):
+                return slope * np.asarray(xn, float) + intercept
+    return _fitted_func, slope, intercept
+    
+
+   
+def plot_CC_relation_bessel( Tspace, Tspace_all, filters,  MAGS_per_filter, MAGS_per_filter_all, fitted_func, slope, intercept, xlim =  (-0.5, 1.5), ylim =  (-0.5, 1.5)):
+    fig, ax = plt.subplots(figsize=(7, 5))
+    xmin, xmax = xlim 
+    ymin, ymax = ylim 
+
+    x_space = np.linspace(xmin, xmax, 10)
+
+
+    fit = ax.plot(
+        x_space,
+        fitted_func(x_space),
+        lw=1,
+        ls="--",
+        c="k",
+    )
+
+    model_text = f"{PLOT._make_mag_name(filters[0])} = {(slope-1):.3f} {PLOT._make_mag_name(filters[1])} + {slope:.3f}{PLOT._make_mag_name(filters[2])} + {intercept:.3f}"
+
+    ax.text(
+        0.23,
+        0.06,
+        model_text,
+        transform=ax.transAxes,
+        verticalalignment="top",
+        fontsize=11,
+        bbox=dict(boxstyle="round", facecolor="white", alpha=1),
+    )
+
+    all_bessel =ax.scatter(
+        MAGS_per_filter_all[1] - MAGS_per_filter_all[2],
+        MAGS_per_filter_all[1] - MAGS_per_filter_all[0],
+        c='none',
+        edgecolor="k",
+        ls=':',
+        s=50,
+        zorder=2,
+    )
+    
+    scatters = ax.scatter(
+        MAGS_per_filter[1] - MAGS_per_filter[2],
+        MAGS_per_filter[1] - MAGS_per_filter[0],
+        c=Tspace,
+        cmap='Reds',
+        edgecolor="k",
+        lw=1,
+        label = fr'Bessel models [{Tspace.min()}K < T $_{{\mathrm{{eff}}}}$ < {Tspace.max()}K]',
+        s=50,
+        zorder=2,
+    )
+    fig.colorbar(scatters, ax=ax, label='T [K]' )
+    ax.set_xlabel(
+        f"{PLOT._make_mag_name(filters[1])} - {PLOT._make_mag_name(filters[2])}", fontsize=15
+    )
+    ax.set_ylabel(
+        f"{PLOT._make_mag_name(filters[1])} - {PLOT._make_mag_name(filters[0])}", fontsize=15
+    )
+    ax.legend(loc='upper left')
+    ax.set_xlim(xmin, xmax)
+    ax.set_ylim(ymin, ymax)
+
+    ax.tick_params(direction="in", which="both", top=True, right=True)
+    ax.minorticks_on()
+
+    plt.tight_layout()
+    plt.savefig('F405N_F115W_F200W_plus_fit.pdf', bbox_inches='tight')
+
+        
     plt.show()
     return

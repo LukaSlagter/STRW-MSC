@@ -35,7 +35,7 @@ from Config import (
 
 
 def _make_mag_name(filter):
-    return rf"$m_{{\mathrm{{{str(filter)}}}}}$"
+    return rf"m$_{{\mathrm{{{str(filter)}}}}}$"
 
 
 def plot_colorspace_diagram(
@@ -155,24 +155,26 @@ def plot_detection_in_frame(
         mask = PTK.in_wcs_mask(
             source_coordinates.ra, source_coordinates.dec, target_wcs, shape_out
         )
-        x, y = target_wcs.world_to_pixel(source_coordinates[mask])
-        n_y, n_x = shape_out
+        print(np.sum(mask))
+        if np.sum(mask) < 10000:
+            x, y = target_wcs.world_to_pixel(source_coordinates[mask])
+            n_y, n_x = shape_out
 
-        pixel_scales = proj_plane_pixel_scales(target_wcs)
-        pixel_scale_deg = pixel_scales * u.deg / u.pixel
+            pixel_scales = proj_plane_pixel_scales(target_wcs)
+            pixel_scale_deg = pixel_scales * u.deg / u.pixel
 
-        radius_angle = 0.1 * u.arcsec
-        radius_pixel = (radius_angle.to(u.deg) / pixel_scale_deg[0]).value
+            radius_angle = 0.1 * u.arcsec
+            radius_pixel = (radius_angle.to(u.deg) / pixel_scale_deg[0]).value
 
-        apertures = CircularAperture(np.array([x, y]).T, r=radius_pixel)
-        apertures.plot(color="#ff004c", lw=1)
+            apertures = CircularAperture(np.array([x, y]).T, r=radius_pixel)
+            apertures.plot(color="#ff004c", lw=1)
 
-        if tag is not None:
-            tag = np.asarray(tag, dtype=bool)
-            tag_mask = mask & tag
-            xt, yt = target_wcs.world_to_pixel(source_coordinates[tag_mask])
-            aperturest = CircularAperture(np.array([xt, yt]).T, r=radius_pixel)
-            aperturest.plot(color="#0ee7ff", lw=1)
+            if tag is not None:
+                tag = np.asarray(tag, dtype=bool)
+                tag_mask = mask & tag
+                xt, yt = target_wcs.world_to_pixel(source_coordinates[tag_mask])
+                aperturest = CircularAperture(np.array([xt, yt]).T, r=radius_pixel)
+                aperturest.plot(color="#0ee7ff", lw=1)
 
     ax.set_facecolor(plt.colormaps[cmap](0))
     ax.coords["ra"].set_axislabel("RA")

@@ -1,7 +1,0 @@
-nohup: ignoring input
-Initialized filepaths for :  ['F187N', 'F335M', 'F115W', 'F277W', 'F200W', 'F444W', 'F182M', 'F430M', 'F090W', 'F356W', 'F150W', 'F480M', 'F212N']
-----Initializing dither calibration for F200W---------
-----We have a total of 168# to run----------
-(1) Calibrating 1/f:   0%|          | 0/168 [00:00<?, ?it/s](1) Calibrating 1/f: 100%|██████████| 168/168 [00:00<00:00, 64350.97it/s]
-(2) Aligning with gaia catalog:   0%|          | 0/168 [00:00<?, ?it/s](2) Aligning with gaia catalog: 100%|██████████| 168/168 [00:00<00:00, 71486.57it/s]
-WARNING: PhotutilsDeprecationWarning: DEFAULT_COLUMNS is deprecated and will be removed in version 4.0. Use the SourceCatalog.default_columns attribute instead. [jwst.tweakreg.tweakreg_catalog]

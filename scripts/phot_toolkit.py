@@ -22,7 +22,7 @@ from Config import (
 class Read_Catalogue:
     def __init__(
         self,
-        catalogue_path="/home/slagter/Astronomy_master/STRW-MSC/SF_in_NGC/Photometry/NGC346_NIRCam_and_MIRI_Public_JWST_Catalogue.fits",
+        catalogue_path="/home/slagter/Astronomy_master/STRW-MSC/SF_in_NGC/Photometry/catalogue_jeroen/NGC346_NIRCam_and_MIRI_Public_JWST_Catalogue.fits",
     ):
         self.catalogue_path = catalogue_path
         self.catalogue = fits.open(catalogue_path)
@@ -160,8 +160,8 @@ def in_wcs_mask(ra, dec, wcs, shape):
     return mask
 
 
-def Split_Mosaic_on_WHT(FILTER="F115W", wht_threshold=200.0):
-    mosaic_path = str(LEVEL3_DIR) + f"/mosaic_{FILTER}_final_i2d.fits"
+def Split_Mosaic_on_WHT(FILTER="F115W", wht_threshold=200.0, field_mode='inner'):
+    mosaic_path = output_dir + f"/{mosaic_title}_{field_mode}.fits"
     hdu = fits.open(mosaic_path)
 
     # Build masks & Apply
@@ -200,14 +200,14 @@ def Split_Mosaic_on_WHT(FILTER="F115W", wht_threshold=200.0):
 
     hdu_out = fits.HDUList([fits.PrimaryHDU(header=hdu[0].header)] + long_exposure_data)
     hdu_out.writeto(
-        str(LEVEL3_DIR) + f"/mosaic_{FILTER}_long_exposure.fits", overwrite=True
+        str(LEVEL3_DIR) + f"/mosaic_{FILTER}_{field_mode}_long_exposure.fits", overwrite=True
     )
 
     hdu_out = fits.HDUList(
         [fits.PrimaryHDU(header=hdu[0].header)] + short_exposure_data
     )
     hdu_out.writeto(
-        str(LEVEL3_DIR) + f"/mosaic_{FILTER}_short_exposure.fits", overwrite=True
+        str(LEVEL3_DIR) + f"/mosaic_{FILTER}_{field_mode}_short_exposure.fits", overwrite=True
     )
 
     hdu.close()
